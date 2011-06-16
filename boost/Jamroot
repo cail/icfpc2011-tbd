@@ -1,0 +1,9 @@
+
+using python ;
+
+lib libboost_python : : <name>boost_python ;
+
+project : requirements <library>libboost_python ;
+
+python-extension libcpp : libcpp.cpp ;
+

@@ -1,0 +1,10 @@
+Requires bjam and boost-build in addition to boost sources:
+
+  cd && mkdir boost && cd boost && apt-get source libboost1.42-dev
+
+Edit boost-build.jam and runtest.sh if your boost sourcetree is
+deployed elsewhere.
+
+Build with:
+
+  bjam
