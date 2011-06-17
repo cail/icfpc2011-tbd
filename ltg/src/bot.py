@@ -4,15 +4,15 @@ from game import Game
 
 __all__ = [
     'Bot',
-    'GameTrackingBot',
     'IdleBot',
     'InteractiveBot',
 ]
 
 class Bot(object):
-    def begin_game(self, your_number):
+    def begin_game(self, game, your_number):
         assert your_number in range(2)
         self.number = your_number
+        self.game = game
         
     def end_game(self):
         pass
@@ -25,26 +25,6 @@ class Bot(object):
         'return tuple (dir, slot, card_name)'
         raise NotImplementedError()
     
-    
-class GameTrackingBot(Bot):
-    def begin_game(self, your_number):
-        Bot.begin_game(self, your_number)
-        self.game = Game()
-        
-    def receive_move(self, *move):
-        assert self.game.half_moves%2 == 1-self.number
-        self.game.make_half_move(*move)
-        
-    def make_move(self):
-        assert self.game.half_moves%2 == self.number
-        move = self.choose_move()
-        self.game.make_half_move(*move)
-        return move
-    
-    def choose_move(self):
-        raise NotImplementedError()
-        
-        
 class IdleBot(Bot):
     def make_move(self):
         return (1, 0, 'I')
@@ -52,8 +32,8 @@ class IdleBot(Bot):
         pass
 
 class InteractiveBot(GameTrackingBot):
-    def begin_game(self, your_number):
-        super(InteractiveBot, self).begin_game(your_number)
+    def begin_game(self, game, your_number):
+        super(InteractiveBot, self).begin_game(game, your_number)
         print 'You are player 0'
         
     def receive_move(self, *move):
