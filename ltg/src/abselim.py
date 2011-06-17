@@ -1,8 +1,6 @@
-
 import re
 import sys
 
-from game import *
 
 class LambdaParserException(Exception):
     pass

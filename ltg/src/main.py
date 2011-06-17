@@ -1,12 +1,11 @@
 
 from time import clock
 
-from arena import *
-from game import Game
-from bot import *
-from bot_io import *
-from strategy import *
-from strategy_bot import *
+from arena import Arena
+from bot import InteractiveBot, IdleBot
+from bot_io import ThunkIo, DefaultInteractiveIo
+from strategy import SequenceStrategy, GenerateValueStrategy, AppNTo0Strategy
+from strategy_bot import StrategyBot
 
 
 if __name__ == '__main__':

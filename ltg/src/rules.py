@@ -12,16 +12,6 @@ __all__ = [
     'Context',
     'apply',
     'cards',
-#    'zero',
-#    'Function',
-#    'Identity',
-#    'K',
-#    'S',
-#    'Succ',
-#    'Double',
-#    'Get',
-#    'Put',
-#    'Attack',
 ]
 
 SLOTS = 256

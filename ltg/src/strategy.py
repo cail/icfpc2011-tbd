@@ -1,7 +1,7 @@
 
 import copy
 
-from rules import *
+from rules import LEFT_APP, RIGHT_APP, cards
 
 __all__ = [
     'Strategy',
