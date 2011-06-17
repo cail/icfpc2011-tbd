@@ -1,6 +1,5 @@
 from game import IntValue, Error, SLOTS, MAX_APPLICATIONS
 
-print 'hz'
 
 __all__ = [
     'Context',
