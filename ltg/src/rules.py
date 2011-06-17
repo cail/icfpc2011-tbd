@@ -151,6 +151,16 @@ class Put(Function):
         return Identity.instance
 Put.instance = Put()
 
+def increase_vitality(player, slot, amount=1):
+    vitality = player.vitalities[slot]
+    if vitality > 0:
+        player.vitalities[slot] = min(65535, vitality + amount)
+
+def decrease_vitality(player, slot, amount=1):
+    vitality = player.vitalities[slot]
+    if vitality > 0:
+        player.vitalities[slot] = max(0, vitality - amount)
+
     
 class Attack(Function):
     def apply(self, arg, context):
@@ -192,27 +202,32 @@ class Attack2(Function):
         
         ensure_slot_number(self.j) # after decreasing our own slot
         
-        if opp.vitalities[SLOTS-self.j] > 0:
-            opp.vitalities[SLOTS-self.j] = \
-                max(0, opp.vitalities[SLOTS-self.j]-arg*9//10)
-        
+        if context.zombie:
+            increase_vitality(opp, SLOTS-self.j, arg*9//10)
+        else:
+            decrease_vitality(opp, SLOTS-self.j, arg*9//10)
+            
         return Identity.instance
 
 class Inc(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
-        prop = context.game.proponent 
-        if prop.vitalities[arg] > 0 and prop.vitalities[arg] < 65535:
-            prop.vitalities[arg] += 1
+        prop = context.game.proponent
+        if context.zombie:
+            decrease_vitality(prop, arg)
+        else:
+            increase_vitality(prop, arg)
         return Identity.instance        
 Inc.instance = Inc()
 
 class Dec(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
-        opp = context.game.opponent 
-        if opp.vitalities[SLOTS-arg] > 0:
-            opp.vitalities[SLOTS-arg] -= 1
+        opp = context.game.opponent
+        if context.zombie: 
+            increase_vitality(opp, SLOTS - arg)
+        else:
+            decrease_vitality(opp, SLOTS - arg)
         return Identity.instance        
 Dec.instance= Dec()
 
@@ -244,9 +259,10 @@ class Help2(Function):
         
         ensure_slot_number(self.j) # after decreasing the source slot
         
-        if prop.vitalities[self.j] > 0:
-            prop.vitalities[self.j] = \
-                min(65535, prop.vitalities[self.j]+arg*11//10)
+        if context.zombie:
+            decrease_vitality(prop, self.j, arg*11//10)
+        else:
+            increase_vitality(prop, self.j, arg*11//10)
         
         return Identity.instance    
 
