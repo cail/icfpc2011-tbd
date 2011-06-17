@@ -322,5 +322,5 @@ def parse_commands(s):
     order_map = {'l':LEFT_APP, 'r':RIGHT_APP} 
     for cmd_s in s.split(','):
         cmd, order = cmd_s.split()
-        lst.append((order_map[order], card_by_name[cmd])) 
+        lst.append((card_by_name[cmd], order_map[order])) 
     return lst
