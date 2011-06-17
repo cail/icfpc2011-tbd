@@ -1,17 +1,39 @@
 from itertools import *
 from random import random
+from time import clock
 
-import game
+from game import zero, Error, IntValue
 from functions import *
+
+class AbstractFunction(Function):
+    def __init__(self, name, required_type=None):
+        self.name = name
+        self.required_type = required_type
+    def apply(self, arg, context):
+        t = self.required_type
+        if t is not None and not isinstance(arg, t):
+            raise Error('wrong type')
+        return AbstractFunction('({0} {1})'.format(self.name, arg))
+    def __str__(self):
+        return self.name
 
 if __name__ == '__main__':
     x, y, z, t = map(AbstractFunction, 'XYZT')
+    get = AbstractFunction('get', required_type=IntValue)
     
-    desired = apply(apply(x, y, None), apply(z, t, None), None)
-    desired = str(desired)
+    #desired = apply(apply(x, y, None), apply(z, t, None), None)
+    #desired = str(desired)
+    desired = set([
+        '((get {0}) (get {1}))'.format(i, j) 
+        for i in range(4) for j in range(4)
+        ])
     print 'search for', desired
     
-    allowed_functions = [x, y, z, t, Identity.instance, K.instance, S.instance]
+    allowed_functions = [
+        #x, y, z, t, 
+        get,
+        zero, Succ.instance, Double.instance, 
+        Identity.instance, K.instance, S.instance]
     
     possible_steps = list(product(allowed_functions, 'lr'))
     
@@ -22,28 +44,40 @@ if __name__ == '__main__':
     
     cnt = 0
     
+    context = Context(None)
+    
     def rec(cur, depth):
         global cnt
-        if str(cur) == desired:
-            print 'found'
-            print steps_to_str(steps), cur
-            exit()
+        if str(cur) in desired:
+            print 'found', steps_to_str(steps), '->', cur
+            desired.remove(str(cur))
+            if len(desired) == 0:
+                exit()
         if depth == 0:
             return
         cnt += 1
-        if cnt % 10000 == 0:
+        if cnt % 100000 == 0:
             print cnt
         for f, side in possible_steps:
-            if side == 'r':
-                next = apply(cur, f, None)
-            else:
-                next = apply(f, cur, None)
+            try:
+                context.app_limit = 30
+                if side == 'r':
+                    next = apply(cur, f, context)
+                else:
+                    next = apply(f, cur, context)
+            except Error as e:
+                continue
+            except Exception as e:
+                print steps_to_str(steps+[(f, side)])
+                print e
+                exit()
             steps.append((f, side))
             rec(next, depth-1)
             steps.pop()
         
-    for i in range(1, 10):
-        print i
+    start = clock()
+    for i in range(1, 20):
+        print i, clock()-start
         rec(Identity.instance, i)
     
     

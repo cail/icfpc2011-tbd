@@ -4,11 +4,12 @@ from game import IntValue, Error, SLOTS, MAX_APPLICATIONS
 __all__ = [
     'Context',
     'apply',
-    'AbstractFunction',
+    'Function',
     'Identity',
     'K',
     'S',
     'Succ',
+    'Double',
     'Attack',
 ]
 
@@ -42,15 +43,6 @@ class Function(object):
         if self.__dict__ == {}:
             return type_name
         return '{0}{1}'.format(type_name, self.__dict__)
-    
-    
-class AbstractFunction(Function):
-    def __init__(self, name):
-        self.name = name
-    def apply(self, arg, context):
-        return AbstractFunction('({0} {1})'.format(self.name, arg))
-    def __str__(self):
-        return self.name
         
 
 class Identity(Function):
@@ -104,8 +96,16 @@ class Succ(Function):
     def apply(self, arg, context):
         if isinstance(arg, Function):
             raise Error('Succ applied to function')
-        return IntValue(arg+1)
+        return IntValue(min(arg+1, 65535))
 Succ.instance = Succ()
+    
+    
+class Double(Function):
+    def apply(self, arg, context):
+        if isinstance(arg, Function):
+            raise Error('Succ applied to function')
+        return IntValue(min(arg*2, 65535))
+Double.instance = Double()
     
     
 class Attack(Function):
