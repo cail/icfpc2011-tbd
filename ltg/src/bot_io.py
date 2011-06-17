@@ -209,6 +209,25 @@ class QuietInteractiveIo(DefaultInteractiveIo):
         pass
 
 
+class WriteReplayIo(ThunkIo):
+    def __init__(self, fd):
+        self.fd = fd
+
+    def notify_prop_move(self, bot, prop_move):
+        self.write_replay_move(bot, prop_move)
+
+    def notify_opp_move(self, bot, opp_move):
+        self.write_replay_move(bot, opp_move)
+
+    def write_replay_move(self, bot, move):
+        direction, slot, card = move
+        if card == 0:
+            card_name = 'zero'
+        else:
+            card_name = str(card)
+        self.fd.write(dict(l = '1', r = '2')[direction] + ' ' + str(slot) + ' ' + card_name + "\n")
+
+
 class CompositeIo(BotIo):
     def __init__(self, *args):
         self.io_impls = args
