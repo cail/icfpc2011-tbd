@@ -11,7 +11,7 @@ __all__ = [
     'Error',
     'Context',
     'apply',
-    'card',
+    'cards',
 #    'zero',
 #    'Function',
 #    'Identity',
@@ -319,7 +319,7 @@ card_by_name = dict((k, v) for k, v in cards.__dict__.iteritems() if not k.start
 
 def _init_canonical_names():
     for name, card in card_by_name.iteritems():
-        cards.__class__.canonical_name = name
+        card.__class__.canonical_name = name
 _init_canonical_names()
 
 def parse_commands(s):
