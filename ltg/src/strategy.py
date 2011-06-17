@@ -3,6 +3,7 @@ from rules import *
 __all__ = [
     'Strategy',
     'GenerateValueStrategy',
+    'SequenceStrategy',
 ]
 
 class Strategy(object):
@@ -71,4 +72,24 @@ class GenerateValueStrategy(Strategy):
                 self.intermediate_targets.append(cur_target)
                 self.slot_value = self.slot_value + 1
                 return (LEFT_APP, self.slot, 'succ')
+
+class SequenceStrategy(Strategy):
+    def __init__(self, *args):
+        self.strategies = args
+
+    def minimum_slots(self):
+        return reduce(lambda x, y: x.minimum_slots() + y.minimum_slots(), self.strategies)
+
+    def available_moves(self):
+        return reduce(lambda x, y: x.available_moves() + y.available_moves(), self.strategies)
+
+    def current_priority(self):
+        return 0
+    
+    def pop_move(self):
+        for strategy in self.strategies:
+            move = strategy.pop_move()
+            if move != None:
+                return move
+        return None
 
