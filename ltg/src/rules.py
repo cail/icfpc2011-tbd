@@ -19,6 +19,7 @@ __all__ = [
     'S',
     'Succ',
     'Double',
+    'Get',
     'Put',
     'Attack',
 ]
@@ -204,5 +205,6 @@ card_by_name = {
     'K': K.instance,
     'S': S.instance,
     'get': Get.instance,
+    'put': Put.instance,
     'attack': Attack.instance,
 }
