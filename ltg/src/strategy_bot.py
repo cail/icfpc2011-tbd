@@ -1,12 +1,11 @@
 
-from game import Game
-from rules import cards, card_by_name, SLOTS, LEFT_APP, RIGHT_APP
+from rules import cards, LEFT_APP, RIGHT_APP
 from bot import Bot
 
 
 __all__ = [
-    'StrategyBot',
-]
+          'StrategyBot',
+          ]
 
 
 class StrategyBot(Bot):

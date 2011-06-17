@@ -1,6 +1,16 @@
 
 from rules import card_by_name, SLOTS, LEFT_APP, RIGHT_APP
 
+
+__all__ = [
+          'BotIo',
+          'ThunkIo',
+          'DefaultInteractiveIo',
+          'QuietInteractiveIo',
+          'InvalidMoveInputException',
+          ]
+
+
 class BotIo(object):
     def notify_winner(self, player_no):
         raise NotImplementedError()
@@ -18,6 +28,9 @@ class BotIo(object):
         raise NotImplementedError()
 
     def notify_begin_game(self, bot):
+        raise NotImplementedError()
+
+    def notify_prop_move(self, bot, prop_move):
         raise NotImplementedError()
 
     def notify_opp_move(self, bot, opp_move):
@@ -46,6 +59,9 @@ class ThunkIo(BotIo):
     def notify_begin_game(self, bot):
         pass
 
+    def notify_prop_move(self, bot, prop_move):
+        pass
+
     def notify_opp_move(self, bot, opp_move):
         pass
 
@@ -69,6 +85,9 @@ class DefaultInteractiveIo(BotIo):
     def notify_begin_game(self, bot):
         print 'You are player ', bot.number
         
+    def notify_prop_move(self, bot, prop_move):
+        print 'proponent\'s move was ' + str(prop_move)
+
     def notify_opp_move(self, bot, opp_move):
         print 'opponent\'s move was ' + str(opp_move)
 
@@ -159,6 +178,9 @@ class QuietInteractiveIo(DefaultInteractiveIo):
     def notify_begin_game(self, bot):
         pass
         
+    def notify_prop_move(self, bot, prop_move):
+        pass
+
     def notify_opp_move(self, bot, opp_move):
         pass
 
@@ -187,4 +209,38 @@ class QuietInteractiveIo(DefaultInteractiveIo):
         pass
 
 
+class CompositeIo(BotIo):
+    def __init__(self, *args):
+        self.io_impls = args
+
+    def notify_winner(self, player_no):
+        map(lambda x: x.notify_winner(player_no), self.io_impls)
+
+    def notify_tie(self):
+        map(lambda x: x.notify_tie(), self.io_impls)
+
+    def notify_total_moves(self, moves):
+        map(lambda x: x.notify_total_moves(moves), self.io_impls)
+
+    def notify_total_time(self, time):
+        map(lambda x: x.notify_total_time(time), self.io_impls)
+
+    def dump_game(self, bot):
+        map(lambda x: x.dump_game(bot), self.io_impls)
+
+    def notify_begin_game(self, bot):
+        map(lambda x: x.notify_begin_game(bot), self.io_impls)
+
+    def notify_prop_move(self, bot, prop_move):
+        map(lambda x: x.notify_prop_move(bot, prop_move), self.io_impls)
+
+    def notify_opp_move(self, bot, opp_move):
+        map(lambda x: x.notify_opp_move(bot, opp_move), self.io_impls)
+
+    def read_move(self):
+        for io_impl in self.io_impls:
+            move = io_impl.read_move()
+            if move != None:
+                return move
+        return None
 

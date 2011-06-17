@@ -1,19 +1,18 @@
 
 from time import clock
 
-from arena import *
-from game import Game
-from bot import *
-from bot_io import *
-from strategy import *
-from strategy_bot import *
+from arena import Arena
+from bot import IdleBot, InteractiveBot
+from strategy_bot import StrategyBot
+from bot_io import ThunkIo, DefaultInteractiveIo, QuietInteractiveIo, CompositeIo
+from strategy import GenerateValueStrategy, AppNTo0Strategy, SequenceStrategy
 
 
 if __name__ == '__main__':
     start = clock()
 
     thunk_io = ThunkIo()
-    game_io = DefaultInteractiveIo()
+    game_io = CompositeIo(DefaultInteractiveIo(), ThunkIo())
     #game_io = QuietInteractiveIo()
 
     # Interactive against idle

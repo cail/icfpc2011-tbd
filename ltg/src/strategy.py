@@ -1,14 +1,18 @@
 
 import copy
 
-from rules import *
+from rules import cards, LEFT_APP, RIGHT_APP
+
 
 __all__ = [
-    'Strategy',
-    'GenerateValueStrategy',
-    'SequenceStrategy',
-    'AppNTo0Strategy',
-]
+          'Strategy',
+          'GenerateValueStrategy',
+          'SequenceStrategy',
+          'ApplicationSequenceStrategy',
+          'RepeatStrategy',
+          'AppNTo0Strategy',
+          ]
+
 
 class Strategy(object):
     def minimum_slots(self):
@@ -76,6 +80,7 @@ class GenerateValueStrategy(Strategy):
                 self.slot_value = self.slot_value + 1
                 return (LEFT_APP, self.slot, cards.succ)
 
+
 class SequenceStrategy(Strategy):
     def __init__(self, *args):
         self.strategies = args
@@ -95,6 +100,7 @@ class SequenceStrategy(Strategy):
             if move != None:
                 return move
         return None
+
 
 class ApplicationSequenceStrategy(Strategy):
     def __init__(self, *args):
@@ -116,6 +122,7 @@ class ApplicationSequenceStrategy(Strategy):
             return None
         else:
             return self.apps.pop()
+
 
 class RepeatStrategy(Strategy):
     def __init__(self, n, strategy):
@@ -143,6 +150,7 @@ class RepeatStrategy(Strategy):
                 self.cur_strategy = copy.deepcopy(self.strategy)
                 move = self.cur_strategy.pop_move()
         return move
+
 
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 2) (get 0))
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 3) (get 0))

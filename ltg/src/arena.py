@@ -1,6 +1,11 @@
 
 from game import Game
 
+
+__all__ = [
+          'Arena',
+          ]
+
 class Arena(object):
     def __init__(self, arena_io, bot1, bot2):
         self.io = arena_io
@@ -13,8 +18,8 @@ class Arena(object):
         self.report_outcome()
 
     def prep_up(self):
-        for bot in zip(range(2), self.bots):
-            bot[1].begin_game(self.game, bot[0])
+        for (bot_num, bot) in zip(range(2), self.bots):
+            bot.begin_game(self.game, bot_num)
 
     def duke_it_out(self):
         while not self.game.is_finished():
