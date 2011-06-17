@@ -25,6 +25,7 @@ __all__ = [
 ]
 
 SLOTS = 256
+MAX_SLOT = SLOTS - 1
 INITIAL_VITALITY = 10000
 MAX_APPLICATIONS = 1000
 MAX_TURNS = 10000 # REDUCED FOR TESTING (originally 10**5)
@@ -198,9 +199,9 @@ class Attack2(Attack):
         ensure_slot_number(self.j) # after decreasing our own slot
         
         if context.zombie:
-            increase_vitality(opp, SLOTS-self.j, arg*9//10)
+            increase_vitality(opp, MAX_SLOT-self.j, arg*9//10)
         else:
-            decrease_vitality(opp, SLOTS-self.j, arg*9//10)
+            decrease_vitality(opp, MAX_SLOT-self.j, arg*9//10)
             
         return card.I
     
@@ -222,9 +223,9 @@ class Dec(Function):
         ensure_slot_number(arg)
         opp = context.game.opponent
         if context.zombie: 
-            increase_vitality(opp, SLOTS - arg)
+            increase_vitality(opp, MAX_SLOT - arg)
         else:
-            decrease_vitality(opp, SLOTS - arg)
+            decrease_vitality(opp, MAX_SLOT - arg)
         return card.I        
 
 class Help(Function):
@@ -289,10 +290,10 @@ class Zombie1(Function):
     def apply(self, arg, context):
         ensure_slot_number(self.i)
         opp = context.game.opponent
-        if opp.vitalities[SLOTS-self.i] > 0:
+        if opp.vitalities[MAX_SLOT-self.i] > 0:
             raise Error('can\'t zombify a living slot')
-        opp.values[SLOTS-self.i] = arg
-        opp.vitalities[SLOTS-self.i] = -1
+        opp.values[MAX_SLOT-self.i] = arg
+        opp.vitalities[MAX_SLOT-self.i] = -1
         return card.I
     def __str__(self):
         return self.partial_str(self.i, self.j)
