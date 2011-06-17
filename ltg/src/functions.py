@@ -4,8 +4,10 @@ from game import IntValue, Error, SLOTS, MAX_APPLICATIONS
 __all__ = [
     'Context',
     'apply',
+    'AbstractFunction',
     'Identity',
     'K',
+    'S',
     'Succ',
     'Attack',
 ]
@@ -25,7 +27,10 @@ class Context(object):
 def apply(f, arg, context):
     if isinstance(f, IntValue):
         raise Error('Attempt to apply integer')
-    context.count_apply()
+    # i'm deliberately making context required parameter,
+    # so it won't be forgotten somewhere in cards by accident
+    if context is not None:
+        context.count_apply()
     return f.apply(arg, context)
 
 
@@ -38,6 +43,15 @@ class Function(object):
             return type_name
         return '{0}{1}'.format(type_name, self.__dict__)
     
+    
+class AbstractFunction(Function):
+    def __init__(self, name):
+        self.name = name
+    def apply(self, arg, context):
+        return AbstractFunction('({0} {1})'.format(self.name, arg))
+    def __str__(self):
+        return self.name
+        
 
 class Identity(Function):
     def apply(self, arg, context):
@@ -61,6 +75,29 @@ class K1(Function):
         return self.value
     def __str__(self):
         return '{0}[{1}]'.format(type(self).__name__, self.value)
+    
+    
+class S(Function):
+    def apply(self, arg, context):
+        return S1(arg)
+S.instance = S()        
+
+
+class S1(Function):
+    def __init__(self, f):
+        self.f = f
+    def apply(self, arg, context):
+        return S2(self.f, arg)
+    
+    
+class S2(Function):
+    def __init__(self, f, g):
+        self.f = f
+        self.g = g
+    def apply(self, arg, context):
+        h = apply(self.f, arg, context)
+        y = apply(self.g, arg, context)
+        return apply(h, y, context)
     
     
 class Succ(Function):
