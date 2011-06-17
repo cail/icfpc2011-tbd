@@ -6,5 +6,7 @@ found [get r, S l, get r, K l, S l, Succ r, 0 r] -> ((get 1) (get 1))
 found [0 r, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 2) (get 0))
 found [get r, 0 r, K l, S l, get r, K l, S l, Succ r, 0 r] -> ((get 0) (get 1))
 found [0 r, Succ l, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 3) (get 0))
+found [get r, K l, S l, Succ r, S l, get r, K l, S l, Succ r, 0 r] -> ((get 2) (get 1))
+found [get r, S l, get r, K l, S l, Succ r, K l, S l, Succ r, 0 r] -> ((get 2) (get 2))
 
 nothing more so far...
