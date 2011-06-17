@@ -43,11 +43,11 @@ class Game(object):
                 z = prop.values[i]
                 context = Context(self, zombie=True)
                 try:
-                    _ = apply(z, Identity.instance, context) # not interested in result
+                    _ = apply(z, card.I, context) # not interested in result
                 except Error as e:
                     if not self.silent:
                         print e
-                prop.values[i] = Identity.instance
+                prop.values[i] = card.I
                 prop.vitalities[i] = 0
                 if not self.silent:
                     print 'zombie is rested'
@@ -84,7 +84,7 @@ class Game(object):
         except Error as e:
             if not self.silent:
                 print 'Error:' + str(e)
-            self.proponent.values[slot] = Identity.instance
+            self.proponent.values[slot] = card.I
             
         
                 
@@ -97,7 +97,7 @@ class Game(object):
                 vit = player.vitalities[slot]
                 value = player.values[slot]
                 if vit != INITIAL_VITALITY or \
-                   value != Identity.instance:
+                   value != card.I:
                     result.append('    {0:03}: ({1}, {2})'.format(slot, vit, value))
         return '\n'.join(result)
 

@@ -196,7 +196,61 @@ class Attack2(Attack):
         
         if opp.vitalities[SLOTS-self.j] > 0:
             opp.vitalities[SLOTS-self.j] = \
-                IntValue(max(0, opp.vitalities[SLOTS-self.j]-arg*9//10))
+                max(0, opp.vitalities[SLOTS-self.j]-arg*9//10)
+        
+        return card.I
+    
+    def __str__(self):
+        return self.partial_str(self.i, self.j)
+
+class Inc(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        prop = context.game.proponent 
+        if prop.vitalities[arg] > 0 and prop.vitalities[arg] < 65535:
+            prop.vitalities[arg] += 1
+        return card.I        
+
+class Dec(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        opp = context.game.opponent 
+        if opp.vitalities[SLOTS-arg] > 0:
+            opp.vitalities[SLOTS-arg] -= 1
+        return card.I        
+
+class Help(Function):
+    def apply(self, arg, context):
+        return Help1(arg)    
+
+class Help1(Function):
+    def __init__(self, i):
+        self.i = i
+    def apply(self, arg, context):
+        return Help2(self.i, arg)
+
+class Help2(Function):
+    def __init__(self, i, j):
+        self.i = i
+        self.j = j
+    def apply(self, arg, context):
+        
+        prop = context.game.proponent
+        
+        ensure_slot_number(self.i)
+        if isinstance(arg, Function):
+            raise Error('help strength is a function')
+        if arg > prop.vitalities[self.i]:
+            raise Error('too strong help')
+        prop.vitalities[self.i] -= arg
+        
+        ensure_slot_number(self.j) # after decreasing the source slot
+        
+        if prop.vitalities[self.j] > 0:
+            prop.vitalities[self.j] = \
+                min(65535, prop.vitalities[self.j]+arg*11//10)
+        
+        return card.I    
 
     def __str__(self):
         return self.partial_str(self.i, self.j)
@@ -210,13 +264,13 @@ class card(object):
     put = Put()
     S = S()
     K = K()
-    # inc = Inc()
-    # dec = Dec()
+    inc = Inc()
+    dec = Dec()
     attack = Attack()
-    # help = _rules.Help()
-    # copy = _rules.Copy()
-    # revive = _rules.Revive()
-    # zombie = _rules.Zombie()
+    help = Help()
+    # copy = Copy()
+    # revive = Revive()
+    # zombie = Zombie()
 
 card_by_name = dict((k, v) for k, v in card.__dict__.iteritems() if not k.startswith('_'))
 
