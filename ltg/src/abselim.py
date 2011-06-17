@@ -1,5 +1,6 @@
 
 import re
+import sys
 
 from game import *
 
@@ -74,7 +75,6 @@ def parse_lambda(tokens):
 def parse_lambda2(variable, tokens):
     s = m(tokens)
     if s[0] != '.':
-        #raise LambdaParserException('malformed lambda')
         interm = parse_lambda(tokens)
     else:
         interm = parse_expr(None, s[1])
@@ -129,8 +129,10 @@ class Lambda:
         return False
 
 if __name__ == '__main__':
-    print parse(r'(\x y. Y succ y x)')[0].transform().dump()
-    print parse(r'(\x y z t. (x y) (z t))')[0].transform().dump()
-    print parse(r'(\x y z. x (y z))')[0].transform().dump()
-    pass
+    while True:
+        sys.stdout.write('>>> ');
+        try:
+            print parse('(' + sys.stdin.readline() + ')')[0].transform().dump()
+        except LambdaParserException as e:
+            print '\nError: ' + e.args[0]
 
