@@ -1,9 +1,13 @@
+
+import copy
+
 from rules import *
 
 __all__ = [
     'Strategy',
     'GenerateValueStrategy',
     'SequenceStrategy',
+    'AppNTo0Strategy',
 ]
 
 class Strategy(object):
@@ -30,7 +34,7 @@ class Strategy(object):
 
 
 class GenerateValueStrategy(Strategy):
-    def __init__(self, target, slot = 0):
+    def __init__(self, slot = 0, target = 0):
         self.target = target
         self.intermediate_targets = [target]
         while target > 1:
@@ -78,10 +82,10 @@ class SequenceStrategy(Strategy):
         self.strategies = args
 
     def minimum_slots(self):
-        return reduce(lambda x, y: x.minimum_slots() + y.minimum_slots(), self.strategies)
+        return reduce(lambda x, y: x + y.minimum_slots(), self.strategies, 0)
 
     def available_moves(self):
-        return reduce(lambda x, y: x.available_moves() + y.available_moves(), self.strategies)
+        return reduce(lambda x, y: x + y.available_moves(), self.strategies, 0)
 
     def current_priority(self):
         return 0
@@ -92,4 +96,66 @@ class SequenceStrategy(Strategy):
             if move != None:
                 return move
         return None
+
+class ApplicationSequenceStrategy(Strategy):
+    def __init__(self, *args):
+        self.apps = []
+        for app in args:
+            self.apps.append(app)
+
+    def minimum_slots(self):
+        return 1
+
+    def available_moves(self):
+        return len(self.apps)
+
+    def current_priority(self):
+        return 0
+    
+    def pop_move(self):
+        if len(self.apps) == 0:
+            return None
+        else:
+            return self.apps.pop()
+
+class RepeatStrategy(Strategy):
+    def __init__(self, n, strategy):
+        self.n = n
+        self.strategy = strategy
+        self.cur_strategy = self.strategy
+
+    def minimum_slots(self):
+        return self.cur_strategy.minimum_slots()
+
+    def available_moves(self):
+        return 1
+
+    def current_priority(self):
+        return 0
+    
+    def pop_move(self):
+        move = self.cur_strategy.pop_move()
+        if move == None:
+            self.n = self.n - 1
+            if self.n == 0:
+                return None
+            else:
+                self.cur_strategy = copy.deepcopy(self.strategy)
+        else:
+            return move
+
+# Vlad Shcherbina: found [0 r, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 2) (get 0))
+# Vlad Shcherbina: found [0 r, Succ l, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 3) (get 0))
+class AppNTo0Strategy(SequenceStrategy):
+    def __init__(self, slot = 0):
+        self.slot = slot
+        self.strategies = [
+                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, 'zero')),
+                           RepeatStrategy(n = self.slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, 'succ'))),
+                           ApplicationSequenceStrategy((LEFT_APP, self.slot, 'get'),
+                                                       (LEFT_APP, self.slot, 'K'),
+                                                       (LEFT_APP, self.slot, 'S'),
+                                                       (RIGHT_APP, self.slot, 'get'),
+                                                       (RIGHT_APP, self.slot, 'zero')),
+                          ]
 
