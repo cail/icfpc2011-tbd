@@ -1,77 +1,20 @@
-
 SLOTS = 256
 INITIAL_VITALITY = 10000
 MAX_APPLICATIONS = 1000
 
+
 class IntValue(int):
     pass
 
-zero = IntValue(0)
-
-
-def apply(f, arg, context):
-    if isinstance(f, IntValue):
-        raise Error('Attempt to apply integer')
-    context.count_apply()
-    return f.apply(arg, context)
-
-
-class Function(object):
-    def apply(self, arg, context):
-        raise NotImplementedError()
-    def __str__(self):
-        type_name = type(self).__name__
-        if self.__dict__ == {}:
-            return type_name
-        return '{0}{1}'.format(type_name, self.__dict__)
-        #return ''
-    
-
-class Identity(Function):
-    def apply(self, arg, context):
-        return arg
-    def __str__(self):
-        return 'Id'
-Identity.instance = Identity()
-
-
-class K(Function):
-    def apply(self, arg, context):
-        return K1(arg)
-K.instance = K()
-
-    
-class K1(Function):
-    'K with one argument applied'
-    def __init__(self, value):
-        self.value = value
-    def apply(self, arg, context):
-        return self.value
-    def __str__(self):
-        return '{0}[{1}]'.format(type(self).__name__, self.value)
-    
-    
-class Succ(Function):
-    def apply(self, arg, context):
-        if isinstance(arg, Function):
-            raise Error('Succ applied to function')
-        return IntValue(arg+1)
-Succ.instance = Succ()
-    
-    
-class Context(object):
-    def __init__(self, game):
-        self.app_limit = MAX_APPLICATIONS
-        self.game = game
-    def count_apply(self):
-        self.app_limit -= 1
-        if self.app_limit < 0:
-            raise Error('application limit exceeded')
-
+zero = IntValue(0)        
+        
 
 class Error(Exception):
     pass
 
+
+# functions module in turn imports SLOTS etc. from game module, so...
+from functions import *
 
 
 class Player(object):
