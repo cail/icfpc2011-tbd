@@ -184,6 +184,7 @@ card_by_name = {
     'I': Identity.instance,
     'zero': zero,
     'succ': Succ.instance,
+    'dbl': Double.instance,
     'K': K.instance,
     'attack': Attack.instance,
 }
