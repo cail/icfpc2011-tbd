@@ -123,7 +123,6 @@ class S2(S):
     
     
 class Succ(Function):
-    canonical_name = 'succ'
     def apply(self, arg, context):
         if isinstance(arg, Function):
             raise Error('Succ applied to function')
@@ -131,7 +130,6 @@ class Succ(Function):
     
     
 class Double(Function):
-    canonical_name = 'dbl'
     def apply(self, arg, context):
         if isinstance(arg, Function):
             raise Error('Dbl applied to function')
@@ -139,7 +137,6 @@ class Double(Function):
     
 
 class Get(Function):
-    canonical_name = 'get'
     def apply(self, arg, context):
         ensure_slot_number(arg)
         if context.game.proponent.vitalities[arg] <= 0:
@@ -148,7 +145,6 @@ class Get(Function):
 
     
 class Put(Function):
-    canonical_name = 'put'
     def apply(self, arg, context):
         return card.I
 
@@ -164,7 +160,6 @@ def decrease_vitality(player, slot, amount=1):
 
     
 class Attack(Function):
-    canonical_name = 'attack'
     def apply(self, arg, context):
         return Attack1(arg)    
     
