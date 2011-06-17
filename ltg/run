@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/bin/python src/run.py Bot $1
