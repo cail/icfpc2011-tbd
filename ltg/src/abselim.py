@@ -1,5 +1,6 @@
 
 import re
+import sys
 
 from game import *
 
@@ -97,7 +98,7 @@ class Expr:
         self.left = left
         self.right = right
     def dump(self):
-        return self.left.dump() + '(' + self.right.dump() + ')'
+        return '(' + self.left.dump() + ' ' + self.right.dump() + ')'
     def transform(self):
         return Expr(self.left.transform(), self.right.transform())
     def free(self, atom):
@@ -129,8 +130,9 @@ class Lambda:
         return False
 
 if __name__ == '__main__':
-    print parse(r'(\x y. Y succ y x)')[0].transform().dump()
-    print parse(r'(\x y z t. (x y) (z t))')[0].transform().dump()
-    print parse(r'(\x y z. x (y z))')[0].transform().dump()
+    #print parse(r'(\x y. Y succ y x)')[0].transform().dump()
+    #print parse(r'(\x y z t. (x y) (z t))')[0].transform().dump()
+    #print parse(r'(\x y z. x (y z))')[0].transform().dump()
+    print parse(' '.join(sys.argv[1:]))[0].transform().dump()
     pass
 
