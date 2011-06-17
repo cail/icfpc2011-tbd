@@ -7,6 +7,8 @@ INITIAL_VITALITY = 10000
 MAX_APPLICATIONS = 1000
 MAX_TURNS = 10000 # REDUCED FOR TESTING (originally 10**5)
 
+LEFT_APP = 1
+RIGHT_APP = 2
 
 class IntValue(int):
     pass
@@ -106,7 +108,7 @@ class Game(object):
             self.proponent.values[slot] = result
         except Error as e:
             if not self.silent:
-                print e
+                print 'Error:' + str(e)
             self.proponent.values[slot] = Identity.instance
             
         
