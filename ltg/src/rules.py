@@ -194,7 +194,61 @@ class Attack2(Function):
         
         if opp.vitalities[SLOTS-self.j] > 0:
             opp.vitalities[SLOTS-self.j] = \
-                IntValue(max(0, opp.vitalities[SLOTS-self.j]-arg*9//10))
+                max(0, opp.vitalities[SLOTS-self.j]-arg*9//10)
+        
+        return Identity.instance
+
+class Inc(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        prop = context.game.proponent 
+        if prop.vitalities[arg] > 0 and prop.vitalities[arg] < 65535:
+            prop.vitalities[arg] += 1
+        return Identity.instance        
+Inc.instance = Inc()
+
+class Dec(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        opp = context.game.opponent 
+        if opp.vitalities[SLOTS-arg] > 0:
+            opp.vitalities[SLOTS-arg] -= 1
+        return Identity.instance        
+Dec.instance= Dec()
+
+class Help(Function):
+    def apply(self, arg, context):
+        return Help1(arg)    
+Help.instance = Help()
+
+class Help1(Function):
+    def __init__(self, i):
+        self.i = i
+    def apply(self, arg, context):
+        return Help2(self.i, arg)
+
+class Help2(Function):
+    def __init__(self, i, j):
+        self.i = i
+        self.j = j
+    def apply(self, arg, context):
+        
+        prop = context.game.proponent
+        
+        ensure_slot_number(self.i)
+        if isinstance(arg, Function):
+            raise Error('help strength is a function')
+        if arg > prop.vitalities[self.i]:
+            raise Error('too strong help')
+        prop.vitalities[self.i] -= arg
+        
+        ensure_slot_number(self.j) # after decreasing the source slot
+        
+        if prop.vitalities[self.j] > 0:
+            prop.vitalities[self.j] = \
+                min(65535, prop.vitalities[self.j]+arg*11//10)
+        
+        return Identity.instance    
 
 
 card_by_name = {
@@ -207,4 +261,7 @@ card_by_name = {
     'get': Get.instance,
     'put': Put.instance,
     'attack': Attack.instance,
+    'inc': Inc.instance,
+    'dec': Dec.instance,
+    'help': Help.instance
 }
