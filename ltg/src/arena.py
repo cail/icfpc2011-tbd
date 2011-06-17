@@ -1,6 +1,11 @@
 
 from game import Game
 
+
+__all__ = [
+          'Arena',
+          ]
+
 class Arena(object):
     def __init__(self, arena_io, bot1, bot2):
         self.io = arena_io
