@@ -50,7 +50,7 @@ class DefaultInteractiveIo(BotIo):
                 slot = self.read_slot()
                 card = self.read_card()
                 break
-            self.warn_direction()
+            self.warn_direction(direction)
         return (direction, slot, card)
 
     def read_slot(self): 
@@ -63,7 +63,7 @@ class DefaultInteractiveIo(BotIo):
                 self.warn_value_error(e)
                 continue
             if slot not in range(SLOTS):
-                self.warn_slot_range()
+                self.warn_slot_range(slot)
                 continue
             return slot
         
@@ -73,7 +73,7 @@ class DefaultInteractiveIo(BotIo):
             card = self.get_input_line()
             if card in card_by_name:
                 return card_by_name[card]
-            self.warn_available_cards()
+            self.warn_available_cards(card)
             
     def get_input_line(self):
         return raw_input()
@@ -81,14 +81,14 @@ class DefaultInteractiveIo(BotIo):
     def warn_value_error(self, e):
         print e
 
-    def warn_direction(self):
-        print 'enter 1 or 2'
+    def warn_direction(self, direction):
+        print 'enter 1 or 2 (got: ' + direction + ')'
 
-    def warn_slot_range(self):
-        print 'between ', 0, ' and', (SLOTS - 1)
+    def warn_slot_range(self, slot):
+        print 'between ' + str(0) + ' and ' + str(SLOTS - 1) + ' (got: ' + str(slot) + ')'
 
-    def warn_available_cards(self):
-        print 'available card names are', card_by_name.keys()
+    def warn_available_cards(self, card):
+        print 'available card names are' + str(card_by_name.keys()) + ' (got: ' + card + ')'
 
     def prompt_direction(self):
         print '(1) apply card to slot, or (2) apply slot to card?'
@@ -98,5 +98,45 @@ class DefaultInteractiveIo(BotIo):
 
     def prompt_card_name(self):
         print 'card name?'
+
+
+class InvalidMoveInputException(Exception):
+    pass
+
+
+class QuietInteractiveIo(DefaultInteractiveIo):
+    def dump_game(self, bot):
+        pass
+
+    def notify_begin_game(self, bot):
+        pass
+        
+    def notify_opp_move(self, bot, opp_move):
+        pass
+
+    def get_input_line(self):
+        return raw_input()
+
+    def warn_value_error(self, e):
+        raise InvalidMoveInputException('ValueError', e)
+
+    def warn_direction(self, direction):
+        raise InvalidMoveInputException('direction', direction)
+
+    def warn_slot_range(self, slot):
+        raise InvalidMoveInputException('slot', slot)
+
+    def warn_available_cards(self, card):
+        raise InvalidMoveInputException('card', card)
+
+    def prompt_direction(self):
+        pass
+
+    def prompt_slot_no(self):
+        pass
+
+    def prompt_card_name(self):
+        pass
+
 
 

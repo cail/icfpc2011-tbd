@@ -32,9 +32,10 @@ if __name__ == '__main__':
     start = clock()
     thunk_io = ThunkIo()
     game_io = DefaultInteractiveIo()
+    #game_io = QuietInteractiveIo()
 
     # Interactive against idle
-    #match(game_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
+    match(game_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
 
     # Non-interactive faux strat against idle
     strategy_bot_test = StrategyBot(bot_io = game_io)
