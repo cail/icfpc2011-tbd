@@ -31,6 +31,10 @@ class Strategy(object):
 class GenerateValueStrategy(Strategy):
     def __init__(self, target, slot = 0):
         self.target = target
+        self.intermediate_targets = [target]
+        while target > 1:
+            target = target / 2
+            self.intermediate_targets.append(target)
         self.slot = slot
         self.slot_value = 0
         self.zeroed = False
@@ -40,22 +44,31 @@ class GenerateValueStrategy(Strategy):
         return 1
 
     def available_moves(self):
-        return 1
+        if self.target == self.slot_value:
+            return 0
+        else:
+            return 1
 
     def current_priority(self):
         return 0
 
     def pop_move(self):
         #self.turns = self.turns - 1
-
-        if not self.zeroed:
+        if self.target == self.slot_value:
+            return None
+        elif not self.zeroed:
             self.zeroed = True
             return (RIGHT_APP, self.slot, 'zero')
-        elif (self.slot_value > 0) and (self.slot_value <= (self.target / 2)):
-            self.slot_value = self.slot_value * 2
-            return (LEFT_APP, self.slot, 'dbl')
-        elif self.slot_value < self.target:
+        elif self.slot_value == 0:
             self.slot_value = self.slot_value + 1
             return (LEFT_APP, self.slot, 'succ')
         else:
-            return None
+            cur_target = self.intermediate_targets.pop()
+            if cur_target == self.slot_value:
+                self.slot_value = self.slot_value * 2
+                return (LEFT_APP, self.slot, 'dbl')
+            else:
+                self.intermediate_targets.append(cur_target)
+                self.slot_value = self.slot_value + 1
+                return (LEFT_APP, self.slot, 'succ')
+
