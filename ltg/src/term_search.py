@@ -2,8 +2,8 @@ from itertools import *
 from random import random
 from time import clock
 
-from game import zero, Error, IntValue
-from functions import *
+from rules import *
+
 
 class AbstractFunction(Function):
     def __init__(self, name, required_type=None):
@@ -17,12 +17,11 @@ class AbstractFunction(Function):
     def __str__(self):
         return self.name
 
+
 if __name__ == '__main__':
     x, y, z, t = map(AbstractFunction, 'XYZT')
     get = AbstractFunction('get', required_type=IntValue)
     
-    #desired = apply(apply(x, y, None), apply(z, t, None), None)
-    #desired = str(desired)
     desired = set([
         '((get {0}) (get {1}))'.format(i, j) 
         for i in range(4) for j in range(4)

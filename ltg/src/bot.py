@@ -1,4 +1,6 @@
-from game import Game, card_by_name, SLOTS
+from rules import card_by_name, SLOTS
+from game import Game
+
 
 __all__ = [
     'Bot',
