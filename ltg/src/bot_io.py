@@ -208,3 +208,39 @@ class QuietInteractiveIo(DefaultInteractiveIo):
     def prompt_card_name(self):
         pass
 
+
+class CompositeIo(BotIo):
+    def __init__(self, *args):
+        self.io_impls = args
+
+    def notify_winner(self, player_no):
+        map(lambda x: x.notify_winner(player_no), self.io_impls)
+
+    def notify_tie(self):
+        map(lambda x: x.notify_tie(), self.io_impls)
+
+    def notify_total_moves(self, moves):
+        map(lambda x: x.notify_total_moves(moves), self.io_impls)
+
+    def notify_total_time(self, time):
+        map(lambda x: x.notify_total_time(time), self.io_impls)
+
+    def dump_game(self, bot):
+        map(lambda x: x.dump_game(bot), self.io_impls)
+
+    def notify_begin_game(self, bot):
+        map(lambda x: x.notify_begin_game(bot), self.io_impls)
+
+    def notify_prop_move(self, bot, prop_move):
+        map(lambda x: x.notify_prop_move(bot, prop_move), self.io_impls)
+
+    def notify_opp_move(self, bot, opp_move):
+        map(lambda x: x.notify_opp_move(bot, opp_move), self.io_impls)
+
+    def read_move(self):
+        for io_impl in self.io_impls:
+            move = io_impl.read_move()
+            if move != None:
+                return move
+        return None
+
