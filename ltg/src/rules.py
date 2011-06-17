@@ -19,6 +19,7 @@ __all__ = [
     'S',
     'Succ',
     'Double',
+    'Put',
     'Attack',
 ]
 
@@ -142,6 +143,12 @@ class Get(Function):
             raise Error('Get applied to a dead slot number')
         return context.game.proponent.values[arg]
 Get.instance = Get()
+
+    
+class Put(Function):
+    def apply(self, arg, context):
+        return Identity.instance
+Put.instance = Put()
 
     
 class Attack(Function):
