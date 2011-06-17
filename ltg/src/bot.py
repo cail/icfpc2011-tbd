@@ -48,7 +48,8 @@ class GameTrackingBot(Bot):
 class IdleBot(Bot):
     def make_move(self):
         return (1, 0, 'I')
-
+    def receive_move(self, *move):
+        pass
 
 class InteractiveBot(GameTrackingBot):
     def begin_game(self, your_number):
