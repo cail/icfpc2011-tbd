@@ -20,7 +20,8 @@ class AbstractFunction(Function):
 def generate_get_i_get_j_command(i, j):
     return ', '.join(['zero r'] + 
                      ['succ l'] * i +
-                     ['get l', 'K l', 'S l', 'get r'] +
+                     ['get l'] +
+                     ['K l', 'S l', 'get r'] +
                      ['K l', 'S l', 'succ r'] *j + 
                      ['zero r'])
 s = generate_get_i_get_j_command(3, 7)
