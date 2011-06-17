@@ -1,7 +1,7 @@
 
 import copy
 
-from rules import card, LEFT_APP, RIGHT_APP
+from rules import cards, LEFT_APP, RIGHT_APP
 
 
 __all__ = [
