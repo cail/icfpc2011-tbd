@@ -2,7 +2,8 @@ from time import clock
 
 from game import Game
 from bot import *
-
+from strategy import *
+from strategy_bot import *
 
 def match(bot1, bot2):
     game = Game(silent=False)
@@ -28,5 +29,8 @@ def match(bot1, bot2):
 
 if __name__ == '__main__':
     start = clock()
-    match(InteractiveBot(), IdleBot())
+    #match(InteractiveBot(), IdleBot())
+    strategy_bot_test = StrategyBot()
+    strategy_bot_test.add_strategy(GenerateValueStrategy(15))
+    match(InteractiveBot(), strategy_bot_test)
     print 'it took', clock()-start
