@@ -1,5 +1,5 @@
 
-from rules import card, LEFT_APP, RIGHT_APP
+from rules import cards, LEFT_APP, RIGHT_APP
 from bot import Bot
 
 
@@ -28,7 +28,7 @@ class StrategyBot(Bot):
             chosen_move = choosen_one.pop_move()
             return chosen_move
         else:
-            return (LEFT_APP, 0, card.I)
+            return (LEFT_APP, 0, cards.I)
 
     def acquire_slots(self, slots_count):
         # TODO: fix this

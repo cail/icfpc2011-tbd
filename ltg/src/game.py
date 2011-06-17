@@ -8,7 +8,7 @@ __all__ = [
 class Player(object):
     def __init__(self):
         self.vitalities = [INITIAL_VITALITY]*SLOTS
-        self.values = [card.I]*SLOTS
+        self.values = [cards.I]*SLOTS
     def has_alive_slots(self):
         return any(v > 0 for v in self.vitalities)
     def num_alive_slots(self):
@@ -43,11 +43,11 @@ class Game(object):
                 z = prop.values[i]
                 context = Context(self, zombie=True)
                 try:
-                    _ = apply(z, card.I, context) # not interested in result
+                    _ = apply(z, cards.I, context) # not interested in result
                 except Error as e:
                     if not self.silent:
                         print e
-                prop.values[i] = card.I
+                prop.values[i] = cards.I
                 prop.vitalities[i] = 0
                 if not self.silent:
                     print 'zombie is rested'
@@ -82,7 +82,7 @@ class Game(object):
         except Error as e:
             if not self.silent:
                 print 'Error:' + str(e)
-            self.proponent.values[slot] = card.I
+            self.proponent.values[slot] = cards.I
             
         
                 
@@ -95,7 +95,7 @@ class Game(object):
                 vit = player.vitalities[slot]
                 value = player.values[slot]
                 if vit != INITIAL_VITALITY or \
-                   value != card.I:
+                   value != cards.I:
                     result.append('    {0:03}: ({1}, {2})'.format(slot, vit, value))
         return '\n'.join(result)
 

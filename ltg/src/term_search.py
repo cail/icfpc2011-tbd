@@ -30,8 +30,8 @@ if __name__ == '__main__':
     allowed_functions = [
         #x, y, z, t, 
         get,
-        card.zero, card.succ, card.dbl, 
-        card.I, card.K, card.S]
+        cards.zero, cards.succ, cards.dbl, 
+        cards.I, cards.K, cards.S]
     
     possible_steps = list(product(allowed_functions, 'lr'))
     
@@ -76,6 +76,6 @@ if __name__ == '__main__':
     start = clock()
     for i in range(1, 20):
         print i, clock()-start
-        rec(card.I, i)
+        rec(cards.I, i)
     
     
