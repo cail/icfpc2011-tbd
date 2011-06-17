@@ -1,36 +1,8 @@
-if __name__ == '__main__':
-    raise Exception("don't run this module directly "
-                    "because it participates in cyclic imports")
+from rules import *
 
-SLOTS = 256
-INITIAL_VITALITY = 10000
-MAX_APPLICATIONS = 1000
-MAX_TURNS = 10000 # REDUCED FOR TESTING (originally 10**5)
-
-LEFT_APP = 1
-RIGHT_APP = 2
-
-class IntValue(int):
-    pass
-
-zero = IntValue(0)        
-        
-
-class Error(Exception):
-    pass
-
-
-# functions module in turn imports SLOTS etc. from game module, so...
-from functions import *
-
-
-card_by_name = {
-    'I': Identity.instance,
-    'zero': zero,
-    'succ': Succ.instance,
-    'K': K.instance,
-    'attack': Attack.instance,
-}
+__all__ = [
+    'Game',
+]
 
 
 class Player(object):

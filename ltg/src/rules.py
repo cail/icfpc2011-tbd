@@ -1,7 +1,16 @@
-from game import IntValue, Error, SLOTS, MAX_APPLICATIONS
 
 
 __all__ = [
+    'SLOTS',
+    'INITIAL_VITALITY',
+    'MAX_APPLICATIONS',
+    'MAX_TURNS',
+    'LEFT_APP',
+    'RIGHT_APP',
+    'card_by_name',
+    'IntValue',
+    'zero',
+    'Error',
     'Context',
     'apply',
     'Function',
@@ -12,6 +21,24 @@ __all__ = [
     'Double',
     'Attack',
 ]
+
+
+SLOTS = 256
+INITIAL_VITALITY = 10000
+MAX_APPLICATIONS = 1000
+MAX_TURNS = 10000 # REDUCED FOR TESTING (originally 10**5)
+
+LEFT_APP = 1
+RIGHT_APP = 2
+
+
+IntValue = int
+
+zero = IntValue(0)        
+        
+
+class Error(Exception):
+    pass
 
 
 class Context(object):
@@ -151,3 +178,12 @@ class Attack2(Function):
         if opp.vitalities[SLOTS-self.j] > 0:
             opp.vitalities[SLOTS-self.j] = \
                 IntValue(max(0, opp.vitalities[SLOTS-self.j]-arg*9//10))
+
+
+card_by_name = {
+    'I': Identity.instance,
+    'zero': zero,
+    'succ': Succ.instance,
+    'K': K.instance,
+    'attack': Attack.instance,
+}

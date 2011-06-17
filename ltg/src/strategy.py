@@ -1,4 +1,4 @@
-from game import *
+from rules import *
 
 __all__ = [
     'Strategy',

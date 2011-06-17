@@ -1,4 +1,5 @@
-from game import Game, card_by_name, SLOTS
+from game import Game
+from rules import card_by_name, SLOTS
 from bot import GameTrackingBot
 
 __all__ = [
