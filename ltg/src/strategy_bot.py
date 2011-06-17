@@ -1,10 +1,13 @@
+
 from game import Game
-from rules import card_by_name, SLOTS
+from rules import card, card_by_name, SLOTS, LEFT_APP, RIGHT_APP
 from bot import Bot
+
 
 __all__ = [
     'StrategyBot',
 ]
+
 
 class StrategyBot(Bot):
     '''
@@ -13,23 +16,20 @@ class StrategyBot(Bot):
     Either activate and provide some moves, or wait for a better time
     '''
 
-    def __init__(self):
+    def __init__(self, bot_io):
+        super(StrategyBot, self).__init__(bot_io = bot_io)
         self.strategies = []
-    def begin_game(self, game, your_number):
-        super(StrategyBot, self).begin_game(game, your_number)
 
-    def receive_move(self, *move):
-        super(StrategyBot, self).receive_move(*move)  
+    def receive_move_impl(self, *move):
+        pass
 
-    def choose_move(self):
-        print self.game
+    def make_move_impl(self):
         choosen_one = self.strategies[0]
         if choosen_one.available_moves() > 0:
             chosen_move = choosen_one.pop_move()
-            print chosen_move
             return chosen_move
         else:
-            return (1, 0, 'I')
+            return (LEFT_APP, 0, card.I)
 
     def acquire_slots(self, slots_count):
         # TODO: fix this
@@ -41,3 +41,4 @@ class StrategyBot(Bot):
     def add_strategy(self, strategy):
         self.strategies.append(strategy)
         strategy.activate(self.acquire_slots(strategy.minimum_slots()))
+

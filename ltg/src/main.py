@@ -30,15 +30,21 @@ def match(game_io, bot1, bot2):
 
 if __name__ == '__main__':
     start = clock()
+    thunk_io = ThunkIo()
     game_io = DefaultInteractiveIo()
-    match(game_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot())
-    strategy_bot_test = StrategyBot()
+
+    # Interactive against idle
+    #match(game_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
+
+    # Non-interactive faux strat against idle
+    strategy_bot_test = StrategyBot(bot_io = game_io)
     strategy_bot_test.add_strategy(
             SequenceStrategy(
                              GenerateValueStrategy(slot = 0, target = 15),
                              GenerateValueStrategy(slot = 1, target = 3),
                              GenerateValueStrategy(slot = 3, target = 15),
                              AppNTo0Strategy(slot = 2, n_slot = 4)))
-    match(game_io = game_io, bot1 = IdleBot(), bot2 = strategy_bot_test)
+    match(game_io = game_io, bot1 = IdleBot(bot_io = thunk_io), bot2 = strategy_bot_test)
+
     #print 'it took', clock()-start
 

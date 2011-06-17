@@ -18,7 +18,6 @@ class Strategy(object):
     def activate(self, slots):
         ''' slots is a set with available free slots indexes '''
         self.slots = list(slots)
-        print self.slots
         
     def available_moves(self):
         '''return current number of moves, this strategy may already offer'''
@@ -63,19 +62,19 @@ class GenerateValueStrategy(Strategy):
             return None
         elif not self.zeroed:
             self.zeroed = True
-            return (RIGHT_APP, self.slot, 'zero')
+            return (RIGHT_APP, self.slot, card.zero)
         elif self.slot_value == 0:
             self.slot_value = self.slot_value + 1
-            return (LEFT_APP, self.slot, 'succ')
+            return (LEFT_APP, self.slot, card.succ)
         else:
             cur_target = self.intermediate_targets.pop()
             if cur_target == self.slot_value:
                 self.slot_value = self.slot_value * 2
-                return (LEFT_APP, self.slot, 'dbl')
+                return (LEFT_APP, self.slot, card.dbl)
             else:
                 self.intermediate_targets.append(cur_target)
                 self.slot_value = self.slot_value + 1
-                return (LEFT_APP, self.slot, 'succ')
+                return (LEFT_APP, self.slot, card.succ)
 
 class SequenceStrategy(Strategy):
     def __init__(self, *args):
@@ -91,7 +90,6 @@ class SequenceStrategy(Strategy):
         return 0
     
     def pop_move(self):
-        #print self.strategies
         for strategy in self.strategies:
             move = strategy.pop_move()
             if move != None:
@@ -114,7 +112,6 @@ class ApplicationSequenceStrategy(Strategy):
         return 0
     
     def pop_move(self):
-        #print self.apps
         if len(self.apps) == 0:
             return None
         else:
@@ -154,12 +151,12 @@ class AppNTo0Strategy(SequenceStrategy):
         self.slot = slot
         self.n_slot = n_slot
         self.strategies = [
-                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, 'zero')),
-                           RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, 'succ'))),
-                           ApplicationSequenceStrategy((LEFT_APP, self.slot, 'get'),
-                                                       (LEFT_APP, self.slot, 'K'),
-                                                       (LEFT_APP, self.slot, 'S'),
-                                                       (RIGHT_APP, self.slot, 'get'),
-                                                       (RIGHT_APP, self.slot, 'zero')),
+                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, card.zero)),
+                           RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, card.succ))),
+                           ApplicationSequenceStrategy((LEFT_APP, self.slot, card.get),
+                                                       (LEFT_APP, self.slot, card.K),
+                                                       (LEFT_APP, self.slot, card.S),
+                                                       (RIGHT_APP, self.slot, card.get),
+                                                       (RIGHT_APP, self.slot, card.zero)),
                           ]
 

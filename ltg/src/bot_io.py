@@ -15,6 +15,17 @@ class BotIo(object):
         raise NotImplementedError()
 
 
+class ThunkIo(BotIo):
+    def dump_game(self, bot):
+        pass
+
+    def notify_begin_game(self, bot):
+        pass
+
+    def notify_opp_move(self, bot, opp_move):
+        pass
+
+
 class DefaultInteractiveIo(BotIo):
     def dump_game(self, bot):
         print bot.game
