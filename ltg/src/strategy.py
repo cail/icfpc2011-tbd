@@ -91,6 +91,7 @@ class SequenceStrategy(Strategy):
         return 0
     
     def pop_move(self):
+        #print self.strategies
         for strategy in self.strategies:
             move = strategy.pop_move()
             if move != None:
@@ -101,7 +102,7 @@ class ApplicationSequenceStrategy(Strategy):
     def __init__(self, *args):
         self.apps = []
         for app in args:
-            self.apps.append(app)
+            self.apps.insert(0, app)
 
     def minimum_slots(self):
         return 1
@@ -113,6 +114,7 @@ class ApplicationSequenceStrategy(Strategy):
         return 0
     
     def pop_move(self):
+        #print self.apps
         if len(self.apps) == 0:
             return None
         else:
@@ -147,11 +149,12 @@ class RepeatStrategy(Strategy):
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 2) (get 0))
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 3) (get 0))
 class AppNTo0Strategy(SequenceStrategy):
-    def __init__(self, slot = 0):
+    def __init__(self, slot, n_slot):
         self.slot = slot
+        self.n_slot = n_slot
         self.strategies = [
                            ApplicationSequenceStrategy((RIGHT_APP, self.slot, 'zero')),
-                           RepeatStrategy(n = self.slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, 'succ'))),
+                           RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, 'succ'))),
                            ApplicationSequenceStrategy((LEFT_APP, self.slot, 'get'),
                                                        (LEFT_APP, self.slot, 'K'),
                                                        (LEFT_APP, self.slot, 'S'),

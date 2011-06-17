@@ -137,12 +137,10 @@ Double.instance = Double()
 
 class Get(Function):
     def apply(self, arg, context):
-        if isinstance(arg, Function):
-            raise Error('Get applied to function')
-        print 'bork bork bork'
-        print context.game.proponent
+        ensure_slot_number(arg)
+        if context.game.proponent.vitalities[arg] <= 0:
+            raise Error('Get applied to a dead slot number')
         return context.game.proponent.values[arg]
-        #return IntValue(min(arg+1, 65535))
 Get.instance = Get()
 
     

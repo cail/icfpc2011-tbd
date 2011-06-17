@@ -25,7 +25,9 @@ class StrategyBot(GameTrackingBot):
         print self.game
         choosen_one = self.strategies[0]
         if choosen_one.available_moves() > 0:
-            return choosen_one.pop_move()
+            chosen_move = choosen_one.pop_move()
+            #print chosen_move
+            return chosen_move
         else:
             return (1, 0, 'I')
 

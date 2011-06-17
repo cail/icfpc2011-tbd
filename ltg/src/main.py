@@ -29,13 +29,14 @@ def match(bot1, bot2):
 
 if __name__ == '__main__':
     start = clock()
-    match(InteractiveBot(), IdleBot())
+    #match(InteractiveBot(), IdleBot())
     strategy_bot_test = StrategyBot()
     strategy_bot_test.add_strategy(
             SequenceStrategy(
                              GenerateValueStrategy(slot = 0, target = 15),
                              GenerateValueStrategy(slot = 1, target = 3),
                              GenerateValueStrategy(slot = 3, target = 15),
-                             AppNTo0Strategy(slot = 2)))
+                             AppNTo0Strategy(slot = 2, n_slot = 4)))
     match(IdleBot(), strategy_bot_test)
     print 'it took', clock()-start
+
