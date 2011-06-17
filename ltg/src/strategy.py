@@ -124,7 +124,7 @@ class RepeatStrategy(Strategy):
     def __init__(self, n, strategy):
         self.n = n
         self.strategy = strategy
-        self.cur_strategy = self.strategy
+        self.cur_strategy = copy.deepcopy(self.strategy)
 
     def minimum_slots(self):
         return self.cur_strategy.minimum_slots()
@@ -139,12 +139,13 @@ class RepeatStrategy(Strategy):
         move = self.cur_strategy.pop_move()
         if move == None:
             self.n = self.n - 1
-            if self.n == 0:
+            if self.n <= 0:
+                self.n = 0
                 return None
             else:
                 self.cur_strategy = copy.deepcopy(self.strategy)
-        else:
-            return move
+                move = self.cur_strategy.pop_move()
+        return move
 
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 2) (get 0))
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 3) (get 0))
