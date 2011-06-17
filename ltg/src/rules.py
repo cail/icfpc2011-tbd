@@ -252,6 +252,33 @@ class Help2(Function):
         
         return card.I    
 
+class Copy(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        return context.game.opponent.values[arg]
+
+class Revive(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        if context.game.proponent.vitalities[arg] <= 0:
+            context.game.proponent.vitalities = 1
+        return card.I
+
+class Zombie(Function):
+    def apply(self, arg, context):
+        return Zombie1(arg)    
+
+class Zombie1(Function):
+    def __init__(self, i):
+        self.i = i
+    def apply(self, arg, context):
+        ensure_slot_number(self.i)
+        opp = context.game.opponent
+        if opp.vitalities[SLOTS-self.i] > 0:
+            raise Error('can\'t zombify a living slot')
+        opp.values[SLOTS-self.i] = arg
+        opp.vitalities[SLOTS-self.i] = -1
+        return card.I
     def __str__(self):
         return self.partial_str(self.i, self.j)
 
@@ -268,9 +295,9 @@ class card(object):
     dec = Dec()
     attack = Attack()
     help = Help()
-    # copy = Copy()
-    # revive = Revive()
-    # zombie = Zombie()
+    copy = Copy()
+    revive = Revive()
+    zombie = Zombie()
 
 card_by_name = dict((k, v) for k, v in card.__dict__.iteritems() if not k.startswith('_'))
 
