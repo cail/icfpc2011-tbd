@@ -2,10 +2,11 @@ from time import clock
 
 from game import Game
 from bot import *
+from bot_io import *
 from strategy import *
 from strategy_bot import *
 
-def match(bot1, bot2):
+def match(game_io, bot1, bot2):
     game = Game(silent=False)
     
     bots = bot1, bot2
@@ -13,11 +14,11 @@ def match(bot1, bot2):
     bot2.begin_game(1)
     
     while not game.is_finished():
-        move = bots[game.half_moves%2].make_move()
-        bots[1-game.half_moves%2].receive_move(*move)
+        move = bots[game.half_moves % 2].make_move()
+        bots[1 - (game.half_moves % 2)].receive_move(*move)
         game.make_half_move(*move)
              
-    print 'game finished after half move', game.half_moves-1
+    print 'game finished after half move', (game.half_moves - 1)
     n1, n2 = [p.num_alive_slots() for p in game.players]
     if n1 > n2:
         print 'player 0 wins'
@@ -29,7 +30,8 @@ def match(bot1, bot2):
 
 if __name__ == '__main__':
     start = clock()
-    #match(InteractiveBot(), IdleBot())
+    game_io = DefaultInteractiveIo()
+    match(game_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot())
     strategy_bot_test = StrategyBot()
     strategy_bot_test.add_strategy(
             SequenceStrategy(
@@ -37,6 +39,6 @@ if __name__ == '__main__':
                              GenerateValueStrategy(slot = 1, target = 3),
                              GenerateValueStrategy(slot = 3, target = 15),
                              AppNTo0Strategy(slot = 2, n_slot = 4)))
-    match(IdleBot(), strategy_bot_test)
-    print 'it took', clock()-start
+    match(game_io = game_io, bot1 = IdleBot(), bot2 = strategy_bot_test)
+    #print 'it took', clock()-start
 
