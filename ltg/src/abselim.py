@@ -97,7 +97,7 @@ class Expr:
         self.left = left
         self.right = right
     def dump(self):
-        return self.left.dump() + '(' + self.right.dump() + ')'
+        return '(' + self.left.dump() + ' ' + self.right.dump() + ')'
     def transform(self):
         return Expr(self.left.transform(), self.right.transform())
     def free(self, atom):
