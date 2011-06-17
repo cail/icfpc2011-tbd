@@ -250,6 +250,36 @@ class Help2(Function):
         
         return Identity.instance    
 
+class Copy(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        return context.game.opponent.values[arg]
+Copy = Copy.instance
+
+class Revive(Function):
+    def apply(self, arg, context):
+        ensure_slot_number(arg)
+        if context.game.proponent.vitalities[arg] <= 0:
+            context.game.proponent.vitalities = 1
+        return Identity.instance
+Revive = Revive.instance
+
+class Zombie(Function):
+    def apply(self, arg, context):
+        return Zombie1(arg)    
+Zombie.instance = Zombie()
+
+class Zombie1(Function):
+    def __init__(self, i):
+        self.i = i
+    def apply(self, arg, context):
+        ensure_slot_number(self.i)
+        opp = context.game.opponent
+        if opp.vitalities[SLOTS-self.i] > 0:
+            raise Error('can\'t zombify a living slot')
+        opp.values[SLOTS-self.i] = arg
+        opp.vitalities[SLOTS-self.i] = -1
+        return Identity.instance
 
 card_by_name = {
     'I': Identity.instance,
@@ -263,5 +293,8 @@ card_by_name = {
     'attack': Attack.instance,
     'inc': Inc.instance,
     'dec': Dec.instance,
-    'help': Help.instance
+    'help': Help.instance,
+    'copy': Copy.instance,
+    'revive': Revive.instance,
+    'zombie': Zombie.instance
 }
