@@ -190,8 +190,6 @@ class Attack2(Attack):
         self.j = j
         
     def apply(self, arg, context):
-        assert not context.zombie, 'TODO'
-        
         prop = context.game.proponent
         opp = context.game.opponent
         
