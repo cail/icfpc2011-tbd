@@ -130,10 +130,21 @@ Succ.instance = Succ()
 class Double(Function):
     def apply(self, arg, context):
         if isinstance(arg, Function):
-            raise Error('Succ applied to function')
+            raise Error('Dbl applied to function')
         return IntValue(min(arg*2, 65535))
 Double.instance = Double()
     
+
+class Get(Function):
+    def apply(self, arg, context):
+        if isinstance(arg, Function):
+            raise Error('Get applied to function')
+        print 'bork bork bork'
+        print context.game.proponent
+        return context.game.proponent.values[arg]
+        #return IntValue(min(arg+1, 65535))
+Get.instance = Get()
+
     
 class Attack(Function):
     def apply(self, arg, context):
@@ -186,5 +197,7 @@ card_by_name = {
     'succ': Succ.instance,
     'dbl': Double.instance,
     'K': K.instance,
+    'S': S.instance,
+    'get': Get.instance,
     'attack': Attack.instance,
 }
