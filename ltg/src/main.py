@@ -2,10 +2,10 @@
 from time import clock
 
 from arena import Arena
-from bot import InteractiveBot, IdleBot
-from bot_io import ThunkIo, DefaultInteractiveIo
-from strategy import SequenceStrategy, GenerateValueStrategy, AppNTo0Strategy
+from bot import IdleBot, InteractiveBot
 from strategy_bot import StrategyBot
+from bot_io import ThunkIo, DefaultInteractiveIo, QuietInteractiveIo
+from strategy import GenerateValueStrategy, AppNTo0Strategy, SequenceStrategy
 
 
 if __name__ == '__main__':
@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # Interactive against idle
     arena1 = Arena(arena_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
-    #arena1.fight()
+    arena1.fight()
 
     # Non-interactive faux strat against idle
     strategy_bot_test = StrategyBot(bot_io = game_io)
