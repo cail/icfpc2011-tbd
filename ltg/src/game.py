@@ -1,4 +1,5 @@
-from rules import *
+from rules import INITIAL_VITALITY, SLOTS, MAX_TURNS, LEFT_APP, RIGHT_APP
+from rules import cards, Context, Error
 
 __all__ = [
     'Game',

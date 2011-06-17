@@ -2,7 +2,7 @@ from itertools import *
 from random import random
 from time import clock
 
-from rules import *
+from rules import cards, Function, Error, IntValue, Context
 
 class AbstractFunction(Function):
     def __init__(self, name, required_type=None):

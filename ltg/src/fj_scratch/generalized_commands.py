@@ -1,5 +1,5 @@
 from game import Game
-from rules import parse_commands, apply, card, Context, Function, Error
+from rules import parse_commands, apply, cards, Context, Function, Error
 from rules import IntValue
 from pprint import pprint
  
