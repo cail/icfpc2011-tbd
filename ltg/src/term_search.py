@@ -4,7 +4,6 @@ from time import clock
 
 from rules import *
 
-
 class AbstractFunction(Function):
     def __init__(self, name, required_type=None):
         self.name = name
@@ -31,8 +30,8 @@ if __name__ == '__main__':
     allowed_functions = [
         #x, y, z, t, 
         get,
-        zero, Succ.instance, Double.instance, 
-        Identity.instance, K.instance, S.instance]
+        card.zero, card.succ, card.dbl, 
+        card.I, card.K, card.S]
     
     possible_steps = list(product(allowed_functions, 'lr'))
     
@@ -77,6 +76,6 @@ if __name__ == '__main__':
     start = clock()
     for i in range(1, 20):
         print i, clock()-start
-        rec(Identity.instance, i)
+        rec(card.I, i)
     
     

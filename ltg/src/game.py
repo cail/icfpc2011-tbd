@@ -8,7 +8,7 @@ __all__ = [
 class Player(object):
     def __init__(self):
         self.vitalities = [INITIAL_VITALITY]*SLOTS
-        self.values = [Identity.instance]*SLOTS
+        self.values = [card.I]*SLOTS
     def has_alive_slots(self):
         return any(v > 0 for v in self.vitalities)
     def num_alive_slots(self):
@@ -53,6 +53,9 @@ class Game(object):
                     print 'zombie is rested'
             
     def make_half_move(self, direction, slot, card):
+        import warnings
+        warnings.warn('How about using card types directly, instead of card names?')
+         
         if self.proponent.has_zombies():
             self.zombie_phase()
         # TODO: make GameTrackingBot see state after zombie phase, not before
@@ -60,7 +63,7 @@ class Game(object):
         self.apply(
             slot, 
             card_by_name[card], 
-            [None, 'left', 'right'][direction])
+            direction)
         self.half_moves += 1
         self.proponent, self.opponent = self.opponent, self.proponent
         
@@ -71,9 +74,9 @@ class Game(object):
             if self.proponent.vitalities[slot] <= 0:
                 raise Error('application involving dead slot')
             s = self.proponent.values[slot]
-            if direction == 'left':
+            if direction is LEFT_APP:
                 result = apply(card, s, context)
-            elif direction == 'right':
+            elif direction is RIGHT_APP:
                 result = apply(s, card, context)
             else:
                 assert False

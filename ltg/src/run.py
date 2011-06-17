@@ -26,7 +26,7 @@ if __name__ == '__main__':
     botname = sys.argv[1]
     player = int(sys.argv[2])
         
-    bot = B.__dict__[botname]()
+    bot = getattr(B, botname)()
     bot.begin_game(player)
     
     if player == 0:
