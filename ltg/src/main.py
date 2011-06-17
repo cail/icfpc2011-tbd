@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # Interactive against idle
     arena1 = Arena(arena_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
-    arena1.fight()
+    #arena1.fight()
 
     # Non-interactive faux strat against idle
     strategy_bot_test = StrategyBot(bot_io = game_io)

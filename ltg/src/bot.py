@@ -31,7 +31,9 @@ class Bot(object):
     
     def make_move(self):
         self.io.dump_game(self)
-        return self.make_move_impl()
+        move = self.make_move_impl()
+        self.io.notify_prop_move(self, move)
+        return move
 
     def make_move_impl(self):
         'return tuple (dir, slot, card_name)'

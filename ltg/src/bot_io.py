@@ -30,6 +30,9 @@ class BotIo(object):
     def notify_begin_game(self, bot):
         raise NotImplementedError()
 
+    def notify_prop_move(self, bot, prop_move):
+        raise NotImplementedError()
+
     def notify_opp_move(self, bot, opp_move):
         raise NotImplementedError()
 
@@ -56,6 +59,9 @@ class ThunkIo(BotIo):
     def notify_begin_game(self, bot):
         pass
 
+    def notify_prop_move(self, bot, prop_move):
+        pass
+
     def notify_opp_move(self, bot, opp_move):
         pass
 
@@ -79,6 +85,9 @@ class DefaultInteractiveIo(BotIo):
     def notify_begin_game(self, bot):
         print 'You are player ', bot.number
         
+    def notify_prop_move(self, bot, prop_move):
+        print 'proponent\'s move was ' + str(prop_move)
+
     def notify_opp_move(self, bot, opp_move):
         print 'opponent\'s move was ' + str(opp_move)
 
@@ -169,6 +178,9 @@ class QuietInteractiveIo(DefaultInteractiveIo):
     def notify_begin_game(self, bot):
         pass
         
+    def notify_prop_move(self, bot, prop_move):
+        pass
+
     def notify_opp_move(self, bot, opp_move):
         pass
 
