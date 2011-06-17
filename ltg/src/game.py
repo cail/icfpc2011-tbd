@@ -54,7 +54,6 @@ class Game(object):
             
     def make_half_move(self, direction, slot, card):
         import warnings
-        warnings.warn('How about using card types directly, instead of card names?')
          
         if self.proponent.has_zombies():
             self.zombie_phase()
@@ -62,7 +61,7 @@ class Game(object):
             
         self.apply(
             slot, 
-            card_by_name[card], 
+            card, 
             direction)
         self.half_moves += 1
         self.proponent, self.opponent = self.opponent, self.proponent

@@ -1,12 +1,12 @@
 from game import Game
 from rules import card_by_name, SLOTS
-from bot import GameTrackingBot
+from bot import Bot
 
 __all__ = [
     'StrategyBot',
 ]
 
-class StrategyBot(GameTrackingBot):
+class StrategyBot(Bot):
     '''
     This bot is only a proxy to real strategies, hosted inside of it.
     Each strategy have access to the game state and may decide on how to handle it
@@ -15,8 +15,8 @@ class StrategyBot(GameTrackingBot):
 
     def __init__(self):
         self.strategies = []
-    def begin_game(self, your_number):
-        super(StrategyBot, self).begin_game(your_number)
+    def begin_game(self, game, your_number):
+        super(StrategyBot, self).begin_game(game, your_number)
 
     def receive_move(self, *move):
         super(StrategyBot, self).receive_move(*move)  

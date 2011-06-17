@@ -2,7 +2,7 @@
 from rules import card_by_name, SLOTS, LEFT_APP, RIGHT_APP
 
 class BotIo(object):
-    def dump_game(self, bot, game):
+    def dump_game(self, bot):
         raise NotImplementedError()
 
     def notify_begin_game(self, bot):
@@ -16,8 +16,8 @@ class BotIo(object):
 
 
 class DefaultInteractiveIo(BotIo):
-    def dump_game(self, bot, game):
-        print game
+    def dump_game(self, bot):
+        print bot.game
 
     def notify_begin_game(self, bot):
         print 'You are player ', bot.number
@@ -61,7 +61,7 @@ class DefaultInteractiveIo(BotIo):
         while True:
             card = self.get_input_line()
             if card in card_by_name:
-                return card
+                return card_by_name[card]
             self.warn_available_cards()
             
     def get_input_line(self):

@@ -10,8 +10,8 @@ def match(game_io, bot1, bot2):
     game = Game(silent=False)
     
     bots = bot1, bot2
-    bot1.begin_game(0)
-    bot2.begin_game(1)
+    bot1.begin_game(game, 0)
+    bot2.begin_game(game, 1)
     
     while not game.is_finished():
         move = bots[game.half_moves % 2].make_move()
