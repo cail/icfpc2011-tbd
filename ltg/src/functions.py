@@ -13,9 +13,10 @@ __all__ = [
 
 
 class Context(object):
-    def __init__(self, game):
+    def __init__(self, game, zombie=False):
         self.app_limit = MAX_APPLICATIONS
         self.game = game
+        self.zombie = zombie
     def count_apply(self):
         self.app_limit -= 1
         if self.app_limit < 0:
@@ -97,6 +98,8 @@ class Attack2(Function):
         self.j = j
         
     def apply(self, arg, context):
+        assert not context.zombie, 'TODO'
+        
         prop = context.game.proponent
         opp = context.game.opponent
         
