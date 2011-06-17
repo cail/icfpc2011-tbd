@@ -14,6 +14,7 @@ def read_move(bot):
 
 def write_move(bot):
     direction, slot, card = bot.make_move()
+    print direction
     if direction == 1:
         print card
         print slot
