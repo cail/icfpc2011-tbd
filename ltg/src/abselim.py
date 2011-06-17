@@ -1,11 +1,13 @@
 
 import re
 
+from game import *
+
 class LambdaParserException(Exception):
     pass
 
 def is_whitespace(char):
-    return re.match(r'\s+', char)
+    return re.match(r'\s', char)
 
 def is_special(char):
     return re.match(r'[\(\)\\\.]', char)
@@ -71,9 +73,11 @@ def parse_lambda(tokens):
 
 def parse_lambda2(variable, tokens):
     s = m(tokens)
-    if not re.match(r'\.', s[0]):
-        raise LambdaParserException('malformed lambda')
-    interm = parse_expr(None, s[1])
+    if s[0] != '.':
+        #raise LambdaParserException('malformed lambda')
+        interm = parse_lambda(tokens)
+    else:
+        interm = parse_expr(None, s[1])
     return (Lambda(variable, interm[0]), interm[1])
 
 class Atom:
@@ -125,6 +129,8 @@ class Lambda:
         return False
 
 if __name__ == '__main__':
-    print parse(r'(\x. (\y. Y succ y x))')[0].transform().dump()
+    print parse(r'(\x y. Y succ y x)')[0].transform().dump()
+    print parse(r'(\x y z t. (x y) (z t))')[0].transform().dump()
+    print parse(r'(\x y z. x (y z))')[0].transform().dump()
     pass
 
