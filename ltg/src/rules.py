@@ -19,6 +19,7 @@ __all__ = [
     'S',
     'Succ',
     'Double',
+    'Put',
     'Attack',
 ]
 
@@ -144,6 +145,12 @@ class Get(Function):
         return context.game.proponent.values[arg]
         #return IntValue(min(arg+1, 65535))
 Get.instance = Get()
+
+    
+class Put(Function):
+    def apply(self, arg, context):
+        return Identity.instance
+Put.instance = Put()
 
     
 class Attack(Function):
