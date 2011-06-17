@@ -1,41 +1,24 @@
+
 from time import clock
 
+from arena import *
 from game import Game
 from bot import *
 from bot_io import *
 from strategy import *
 from strategy_bot import *
 
-def match(game_io, bot1, bot2):
-    game = Game(silent=False)
-    
-    bots = bot1, bot2
-    bot1.begin_game(game, 0)
-    bot2.begin_game(game, 1)
-    
-    while not game.is_finished():
-        move = bots[game.half_moves % 2].make_move()
-        bots[1 - (game.half_moves % 2)].receive_move(*move)
-        game.make_half_move(*move)
-             
-    print 'game finished after half move', (game.half_moves - 1)
-    n1, n2 = [p.num_alive_slots() for p in game.players]
-    if n1 > n2:
-        print 'player 0 wins'
-    elif n2 > n1:
-        print 'player 1 wins'
-    else:
-        print 'tie'
-
 
 if __name__ == '__main__':
     start = clock()
+
     thunk_io = ThunkIo()
     game_io = DefaultInteractiveIo()
     #game_io = QuietInteractiveIo()
 
     # Interactive against idle
-    match(game_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
+    arena1 = Arena(arena_io = game_io, bot1 = InteractiveBot(bot_io = game_io), bot2 = IdleBot(bot_io = thunk_io))
+    #arena1.fight()
 
     # Non-interactive faux strat against idle
     strategy_bot_test = StrategyBot(bot_io = game_io)
@@ -45,7 +28,8 @@ if __name__ == '__main__':
                              GenerateValueStrategy(slot = 1, target = 3),
                              GenerateValueStrategy(slot = 3, target = 15),
                              AppNTo0Strategy(slot = 2, n_slot = 4)))
-    match(game_io = game_io, bot1 = IdleBot(bot_io = thunk_io), bot2 = strategy_bot_test)
+    arena2 = Arena(arena_io = game_io, bot1 = IdleBot(bot_io = thunk_io), bot2 = strategy_bot_test)
+    arena2.fight()
 
-    #print 'it took', clock()-start
+    game_io.notify_total_time(clock() - start)
 

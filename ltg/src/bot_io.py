@@ -2,6 +2,18 @@
 from rules import card_by_name, SLOTS, LEFT_APP, RIGHT_APP
 
 class BotIo(object):
+    def notify_winner(self, player_no):
+        raise NotImplementedError()
+
+    def notify_tie(self):
+        raise NotImplementedError()
+
+    def notify_total_moves(self, moves):
+        raise NotImplementedError()
+
+    def notify_total_time(self, time):
+        raise NotImplementedError()
+
     def dump_game(self, bot):
         raise NotImplementedError()
 
@@ -16,6 +28,18 @@ class BotIo(object):
 
 
 class ThunkIo(BotIo):
+    def notify_winner(self, player_no):
+        pass
+
+    def notify_tie(self):
+        pass
+
+    def notify_total_moves(self, moves):
+        pass
+
+    def notify_total_time(self, time):
+        pass
+
     def dump_game(self, bot):
         pass
 
@@ -27,6 +51,18 @@ class ThunkIo(BotIo):
 
 
 class DefaultInteractiveIo(BotIo):
+    def notify_winner(self, player_no):
+        print 'player ' + str(player_no) + ' wins'
+
+    def notify_tie(self):
+        print 'tie'
+
+    def notify_total_moves(self, moves):
+        print 'game finished after half move ' + str(moves)
+
+    def notify_total_time(self, time):
+        print 'it took ' + str(time)
+
     def dump_game(self, bot):
         print bot.game
 
@@ -34,7 +70,7 @@ class DefaultInteractiveIo(BotIo):
         print 'You are player ', bot.number
         
     def notify_opp_move(self, bot, opp_move):
-        print 'opponent\'s move was', opp_move
+        print 'opponent\'s move was ' + str(opp_move)
 
     def read_move(self):
         self.prompt_direction()
@@ -88,7 +124,7 @@ class DefaultInteractiveIo(BotIo):
         print 'between ' + str(0) + ' and ' + str(SLOTS - 1) + ' (got: ' + str(slot) + ')'
 
     def warn_available_cards(self, card):
-        print 'available card names are' + str(card_by_name.keys()) + ' (got: ' + card + ')'
+        print 'available card names are ' + str(card_by_name.keys()) + ' (got: ' + card + ')'
 
     def prompt_direction(self):
         print '(1) apply card to slot, or (2) apply slot to card?'
@@ -105,6 +141,18 @@ class InvalidMoveInputException(Exception):
 
 
 class QuietInteractiveIo(DefaultInteractiveIo):
+    def notify_winner(self, player_no):
+        pass
+
+    def notify_tie(self):
+        pass
+
+    def notify_total_moves(self, moves):
+        pass
+
+    def notify_total_time(self, time):
+        pass
+
     def dump_game(self, bot):
         pass
 

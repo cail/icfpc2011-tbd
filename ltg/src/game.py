@@ -57,7 +57,6 @@ class Game(object):
          
         if self.proponent.has_zombies():
             self.zombie_phase()
-        # TODO: make GameTrackingBot see state after zombie phase, not before
             
         self.apply(
             slot, 
