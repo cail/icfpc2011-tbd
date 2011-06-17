@@ -4,21 +4,39 @@ import re
 class LambdaParserException(Exception):
     pass
 
-def m(string):
-    strlen = len(string)
-    if strlen == 0:
-        return ('', '')
-    elif strlen == 1:
-        return (string, '')
-    else:
-        return (string[0], string[1:])
+def is_whitespace(char):
+    return re.match(r'\s+', char)
 
-def elim_ws(string):
-    s = m(string)
-    if re.match(r'\s', s[0]) != None:
-        return elim_ws(s[1])
+def is_special(char):
+    return re.match(r'[\(\)\\\.]', char)
+
+def tokenize(string):
+    tokens = []
+    curtoken = ''
+    for char in string:
+        if is_whitespace(char):
+            if curtoken != '':
+                tokens.append(curtoken)
+                curtoken = ''
+        elif is_special(char):
+            if curtoken != '':
+                tokens.append(curtoken)
+                curtoken = ''
+            tokens.append(char)
+        else:
+            curtoken = curtoken + char
+    if curtoken != '':
+        tokens.append(curtoken)
+    return tokens
+
+def m(tokens):
+    toklen = len(tokens)
+    if toklen == 0:
+        return ('', [])
+    elif toklen == 1:
+        return (tokens[0], [])
     else:
-        return string
+        return (tokens[0], tokens[1:])
 
 def join_expr(left, right):
     if left == None:
@@ -27,35 +45,35 @@ def join_expr(left, right):
         return Expr(left, right)
 
 def parse(string):
-    return parse_expr(None, string)
+    return parse_expr(None, tokenize(string))
 
-def parse_expr(expr, string):
-    s = m(elim_ws(string))
-    if s[0] == ')' or s[1] == '':
+def parse_expr(expr, tokens):
+    s = m(tokens)
+    if s[0] == ')' or len(s[1]) == 0:
         if expr == None:
             raise LambdaParserException('null expression')
         return (expr, s[1])
     elif s[0] == '(':
-        interm = parse(s[1])
+        interm = parse_expr(None, s[1])
         return parse_expr(join_expr(expr, interm[0]), interm[1])
-    elif expr == None and re.match(r'\\', s[0]):
+    elif expr == None and s[0] == '\\':
         return parse_lambda(s[1])
-    elif re.match(r'[A-Za-z]', s[0]):
+    elif not is_special(s[0]):
         return parse_expr(join_expr(expr, Atom(s[0])), s[1])
     else:
         raise LambdaParserException('unrecognized symbol')
 
-def parse_lambda(string):
-    s = m(elim_ws(string))
-    if not re.match(r'[a-z]', s[0]):
+def parse_lambda(tokens):
+    s = m(tokens)
+    if is_special(s[0]):
         raise LambdaParserException('bad lambda')
     return parse_lambda2(Atom(s[0]), s[1])
 
-def parse_lambda2(variable, string):
-    s = m(elim_ws(string))
+def parse_lambda2(variable, tokens):
+    s = m(tokens)
     if not re.match(r'\.', s[0]):
         raise LambdaParserException('malformed lambda')
-    interm = parse(s[1])
+    interm = parse_expr(None, s[1])
     return (Lambda(variable, interm[0]), interm[1])
 
 class Atom:
@@ -107,5 +125,6 @@ class Lambda:
         return False
 
 if __name__ == '__main__':
-    print parse(r'(\x. (\y. y x))')[0].transform().dump()
+    print parse(r'(\x. (\y. Y succ y x))')[0].transform().dump()
+    pass
 
