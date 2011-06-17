@@ -62,19 +62,19 @@ class GenerateValueStrategy(Strategy):
             return None
         elif not self.zeroed:
             self.zeroed = True
-            return (RIGHT_APP, self.slot, card.zero)
+            return (RIGHT_APP, self.slot, cards.zero)
         elif self.slot_value == 0:
             self.slot_value = self.slot_value + 1
-            return (LEFT_APP, self.slot, card.succ)
+            return (LEFT_APP, self.slot, cards.succ)
         else:
             cur_target = self.intermediate_targets.pop()
             if cur_target == self.slot_value:
                 self.slot_value = self.slot_value * 2
-                return (LEFT_APP, self.slot, card.dbl)
+                return (LEFT_APP, self.slot, cards.dbl)
             else:
                 self.intermediate_targets.append(cur_target)
                 self.slot_value = self.slot_value + 1
-                return (LEFT_APP, self.slot, card.succ)
+                return (LEFT_APP, self.slot, cards.succ)
 
 class SequenceStrategy(Strategy):
     def __init__(self, *args):
@@ -151,12 +151,12 @@ class AppNTo0Strategy(SequenceStrategy):
         self.slot = slot
         self.n_slot = n_slot
         self.strategies = [
-                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, card.zero)),
-                           RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, card.succ))),
-                           ApplicationSequenceStrategy((LEFT_APP, self.slot, card.get),
-                                                       (LEFT_APP, self.slot, card.K),
-                                                       (LEFT_APP, self.slot, card.S),
-                                                       (RIGHT_APP, self.slot, card.get),
-                                                       (RIGHT_APP, self.slot, card.zero)),
+                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, cards.zero)),
+                           RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.succ))),
+                           ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.get),
+                                                       (LEFT_APP, self.slot, cards.K),
+                                                       (LEFT_APP, self.slot, cards.S),
+                                                       (RIGHT_APP, self.slot, cards.get),
+                                                       (RIGHT_APP, self.slot, cards.zero)),
                           ]
 

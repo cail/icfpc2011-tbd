@@ -30,10 +30,10 @@ pprint(commands)
 
 context = Context(None)
 
-state = card.I
+state = cards.I
 
 for cmd, side in commands:
-    if cmd == card.get: 
+    if cmd == cards.get: 
         cmd = AbstractFunction('get', IntValue) 
     if side == 'r':
         state = apply(state, cmd, context)

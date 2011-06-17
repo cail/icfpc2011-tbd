@@ -44,7 +44,7 @@ class IdleBot(Bot):
         pass
 
     def make_move_impl(self):
-        return (LEFT_APP, 0, card.I)
+        return (LEFT_APP, 0, cards.I)
 
 
 class InteractiveBot(Bot):

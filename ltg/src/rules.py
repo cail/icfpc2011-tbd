@@ -147,7 +147,7 @@ class Get(Function):
     
 class Put(Function):
     def apply(self, arg, context):
-        return card.I
+        return cards.I
 
 def increase_vitality(player, slot, amount=1):
     vitality = player.vitalities[slot]
@@ -203,7 +203,7 @@ class Attack2(Attack):
         else:
             decrease_vitality(opp, MAX_SLOT-self.j, arg*9//10)
             
-        return card.I
+        return cards.I
     
     def __str__(self):
         return self.partial_str(self.i, self.j)
@@ -216,7 +216,7 @@ class Inc(Function):
             decrease_vitality(prop, arg)
         else:
             increase_vitality(prop, arg)
-        return card.I        
+        return cards.I        
 
 class Dec(Function):
     def apply(self, arg, context):
@@ -226,7 +226,7 @@ class Dec(Function):
             increase_vitality(opp, MAX_SLOT - arg)
         else:
             decrease_vitality(opp, MAX_SLOT - arg)
-        return card.I        
+        return cards.I        
 
 class Help(Function):
     def apply(self, arg, context):
@@ -263,7 +263,7 @@ class Help2(Function):
         else:
             increase_vitality(prop, self.j, arg*11//10)
         
-        return card.I    
+        return cards.I    
 
     def __str__(self):
         return self.partial_str(self.i, self.j)
@@ -278,7 +278,7 @@ class Revive(Function):
         ensure_slot_number(arg)
         if context.game.proponent.vitalities[arg] <= 0:
             context.game.proponent.vitalities = 1
-        return card.I
+        return cards.I
 
 class Zombie(Function):
     def apply(self, arg, context):
@@ -294,11 +294,11 @@ class Zombie1(Function):
             raise Error('can\'t zombify a living slot')
         opp.values[MAX_SLOT-self.i] = arg
         opp.vitalities[MAX_SLOT-self.i] = -1
-        return card.I
+        return cards.I
     def __str__(self):
         return self.partial_str(self.i, self.j)
 
-class card(object):
+class cards(object):
     I = Identity()
     zero = IntValue(0)
     succ = Succ()
@@ -315,11 +315,11 @@ class card(object):
     revive = Revive()
     zombie = Zombie()
 
-card_by_name = dict((k, v) for k, v in card.__dict__.iteritems() if not k.startswith('_'))
+card_by_name = dict((k, v) for k, v in cards.__dict__.iteritems() if not k.startswith('_'))
 
 def _init_canonical_names():
     for name, card in card_by_name.iteritems():
-        card.__class__.canonical_name = name
+        cards.__class__.canonical_name = name
 _init_canonical_names()
 
 def parse_commands(s):
