@@ -43,7 +43,7 @@ class Game(object):
                 z = prop.values[i]
                 context = Context(self, zombie=True)
                 try:
-                    result = apply(z, Identity.instance, context)
+                    _ = apply(z, Identity.instance, context) # not interested in result
                 except Error as e:
                     if not self.silent:
                         print e

@@ -206,3 +206,16 @@ card_by_name = {
     'get': Get.instance,
     'attack': Attack.instance,
 }
+
+
+def parse_commands(s):
+    import re
+    s = re.sub(r'^\s*\[(.*)\]\s*', r'\1', s) # remove brackets (if any)
+    lst = []
+    order_map = {'l':LEFT_APP, 'r':RIGHT_APP} 
+    for cmd_s in s.split(','):
+        cmd, order = cmd_s.split()
+        lst.append((order_map[order], card_by_name[cmd])) 
+    return lst
+        
+    
