@@ -236,11 +236,14 @@ class Help1(Function):
         self.i = i
     def apply(self, arg, context):
         return Help2(self.i, arg)
+    def __str__(self):
+        return self.partial_str(self.i)
 
 class Help2(Function):
     def __init__(self, i, j):
         self.i = i
         self.j = j
+
     def apply(self, arg, context):
         
         prop = context.game.proponent
@@ -260,6 +263,9 @@ class Help2(Function):
             increase_vitality(prop, self.j, arg*11//10)
         
         return card.I    
+
+    def __str__(self):
+        return self.partial_str(self.i, self.j)
 
 class Copy(Function):
     def apply(self, arg, context):
