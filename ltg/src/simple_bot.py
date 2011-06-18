@@ -14,17 +14,19 @@ __all__ = [
     'PlaybackBot',
 ]
 
-
-class IdleBot(object):
+class Bot(object):
     def __init__(self, game):
         self.game = game
+    def choose_move(self):
+        # choose move happens after zombie phase, you you see most current state
+        raise NotImplementedError()
+
+class IdleBot(Bot):
     def choose_move(self):
         return (LEFT_APP, 0, cards.I)
 
 
-class RandomBot(object):
-    def __init__(self, game):
-        self.game = game
+class RandomBot(Bot):
     def choose_move(self):
         return (
             random.choice([LEFT_APP, RIGHT_APP]), 
@@ -32,10 +34,8 @@ class RandomBot(object):
             random.choice(card_by_name.values()))
 
 
-class InteractiveBot(object):
-    def __init__(self, game):
-        self.game = game
-       
+class InteractiveBot(Bot):
+      
     def read_slot(self):
         print 'slot no?'
         while True:
@@ -83,7 +83,7 @@ class InteractiveBot(object):
         return (direction, slot, card)
     
 
-class PlaybackBot(object):
+class PlaybackBot(Bot):
     def __init__(self, moves, game):
         self.moves = iter(moves)
         self.game = game
@@ -99,43 +99,3 @@ class PlaybackBot(object):
         card = card_by_name[card]
         return dir, slot, card
          
-   
-class OfficialConnectorBot111():
-    # it's not used because it's shit
-    def __init__(self, game):
-        self.game = game
-        
-    def send_last_turn(self):
-        direction, slot, card = self.game.move_history[-1]
-        #print>>sys.stderr, 'echoing opps move', direction, slot, card
-        if direction == LEFT_APP:
-            print 1
-            print card
-            print slot
-        else:
-            print 2
-            print slot
-            print card
-        sys.stdout.flush()
-        #print>>sys.stderr, 'echoed opps move', direction, slot, card
-        
-    def choose_move(self):
-        # output opponent's previous move
-        if len(self.game.move_history) > 0:
-            self.send_last_turn()
-        #print>>sys.stderr, 'reading official move'
-        direction = int(raw_input())
-        if direction == 1:
-            direction = LEFT_APP
-            card = raw_input()
-            slot = int(raw_input())
-        elif direction == 2:
-            direction = RIGHT_APP
-            slot = int(raw_input())
-            card = raw_input()
-        else:
-            assert False
-        card = card_by_name[card]
-        #print>>sys.stderr, 'reading official move - ok', direction, slot, card
-        return direction, slot, card
-
