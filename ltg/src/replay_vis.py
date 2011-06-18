@@ -9,7 +9,8 @@ TABLE_WIDTH = 16
 STEPS_PER_PAGE = 100
 
 def is_init(player, slot):
-    return (player.vitalities[slot] == 10000) and (player.values[slot] == rules.cards.I)
+    return player.vitalities[slot] == rules.INITIAL_VITALITY and \
+           player.values[slot] == rules.cards.I
 
 def cell(h, player, slot):
     with (h.td(klass='active') if not is_init(player, slot) else h.td):

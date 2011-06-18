@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 __all__ = [
     'SLOTS',
     'INITIAL_VITALITY',
@@ -32,20 +34,38 @@ class Context(object):
         self.side_effects = 0
         self.game = game
         self.zombie = zombie
-    def count_apply(self):
-        self.app_limit -= 1
+    def count_apply(self, n=1):
+        self.app_limit -= n
         if self.app_limit < 0:
             raise Error('application limit exceeded')
     def count_side_effect(self):
         # including read side effects
         self.side_effects += 1
 
+
+apply_cache = {}
+
 def apply(f, arg, context):
-    # i'm deliberately making context required parameter,
-    # so it won't be forgotten somewhere in cards by accident
-    if context is not None:
-        context.count_apply()
-    return f.apply(arg, context)
+    pair = f, arg
+    if pair in apply_cache:
+        #print 'application recalled'
+        result, application_count = apply_cache[pair]
+        context.count_apply(application_count)
+        return result
+    
+    app_limit_before = context.app_limit
+    side_effects_before = context.side_effects
+    
+    context.count_apply()
+    result = f.apply(arg, context)
+    
+    if context.side_effects == side_effects_before:
+        # we only memoize functions without side effects
+        assert context.app_limit >= 0
+        application_count = app_limit_before-context.app_limit
+        apply_cache[pair] = result, application_count
+        #print 'application remembered'
+    return result
 
 
 # This part is a bit of a mess, conceptually: we use the same set of classes
@@ -53,10 +73,16 @@ def apply(f, arg, context):
 # evaluated. The problem is most obvious in case of 'zero'.
 # Hopefully it wouldn't lead to scary bugs.
 
+function_cache = defaultdict(dict)
+
 class Function(object):
     @classmethod
     def create(cls, *args):
-        return cls(*args)
+        # TODO: put memoization shit into separate module
+        cache = function_cache[cls]
+        if args not in cache:
+            cache[args] = cls(*args)
+        return cache[args]
     def apply(self, arg, context):
         raise NotImplementedError()
     def __str__(self):
@@ -79,7 +105,7 @@ class AbstractFunction(Function):
         t = self.required_type
         if t is not None and not isinstance(arg, t):
             raise Error('wrong type')
-        return AbstractFunction('{0}({1})'.format(self.name, arg))
+        return AbstractFunction.create('{0}({1})'.format(self.name, arg))
     def __str__(self):
         return self.name
     
@@ -100,7 +126,7 @@ class Identity(Function):
 
 class K(Function):
     def apply(self, arg, context):
-        return K1(arg)
+        return K1.create(arg)
 
 
 class K1(K):

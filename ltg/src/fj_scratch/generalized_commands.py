@@ -1,6 +1,7 @@
 from game import Game
 from rules import LEFT_APP, RIGHT_APP, card_by_name, apply, cards
 from rules import IntValue, Context, AbstractFunction, Error
+from rules import function_cache
 from pprint import pprint
  
 
@@ -20,7 +21,7 @@ def parse_sequence(s):
 
 
 def eval_sequence(commands, start=cards.I, debug=False):
-    get = AbstractFunction('get', IntValue)
+    get = AbstractFunction.create('get', IntValue)
     context = Context(None)
     state = start
     for cmd, side in commands:
@@ -93,5 +94,8 @@ seq = generate_get_i_get_j_sequence(7, 3)
 print len(seq), 'moves'
 print sequence_to_str(seq)
 print eval_sequence(seq)
+print eval_sequence(seq)
+
+#pprint(dict(function_cache))
 
 
