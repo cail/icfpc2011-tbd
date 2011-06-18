@@ -58,6 +58,20 @@ class Function(object):
         return self.canonical_name + ''.join('({0})'.format(arg) for arg in args)
 
 
+# this class is here because all functions are
+class AbstractFunction(Function):
+    def __init__(self, name, required_type=None):
+        self.name = name
+        self.required_type = required_type
+    def apply(self, arg, context):
+        t = self.required_type
+        if t is not None and not isinstance(arg, t):
+            raise Error('wrong type')
+        return AbstractFunction('{0}({1})'.format(self.name, arg))
+    def __str__(self):
+        return self.name
+    
+
 class IntValue(int): # not a Function -- otherwise it would break a lot of code below
     def __init__(self, value):
         self.value = value
@@ -312,12 +326,3 @@ def _init_canonical_names():
         card.__class__.canonical_name = name
 _init_canonical_names()
 
-def parse_commands(s):
-    import re
-    s = re.sub(r'^\s*\[(.*)\]\s*', r'\1', s) # remove brackets (if any)
-    lst = []
-    order_map = {'l':LEFT_APP, 'r':RIGHT_APP} 
-    for cmd_s in s.split(','):
-        cmd, order = cmd_s.split()
-        lst.append((card_by_name[cmd], order_map[order])) 
-    return lst
