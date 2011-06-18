@@ -279,13 +279,15 @@ class DumbSlotKiller(Strategy):
 
     def pick_strategy(self, game):
         if game.opponent.vitalities[self.target_slot] <= 0:
-            print 'already dead'
             self.cur_strategy = NoneStrategy()
         elif game.proponent.vitalities[self.battery_slot] < 60000:
-            print 'boosting battery'
-            self.cur_strategy = BoostBattery(battery_slot = self.battery_slot, boost = game.proponent.vitalities[self.battery_slot] - 1)
+            self.cur_strategy = BoostBattery(battery_slot = self.battery_slot,
+                                             boost = game.proponent.vitalities[self.battery_slot] - 1
+                                            )
         else:
-            print 'attacking'
-            self.cur_strategy = AttackSlot(battery_slot = self.battery_slot, target_slot = self.target_slot, dmg = game.proponent.vitalities[self.battery_slot] * 4 / 5)
+            self.cur_strategy = AttackSlot(battery_slot = self.battery_slot,
+                                           target_slot = self.target_slot,
+                                           dmg = min(game.opponent.vitalities[self.target_slot] * 10 / 9 + 1, game.proponent.vitalities[self.battery_slot] / 2)
+                                          )
             
 
