@@ -101,14 +101,21 @@ def generate_number(n):
         res = (x, res)
     return res
 
-pprint(generate_number(10))
-pprint(((cards.get, generate_number(2)), ((cards.get, generate_number(3)))))
-    
+from terms import term_to_sequence
+
+def get_n(n):
+    return (cards.get, generate_number(n)) 
+
+#t = (get_n(0), (get_n(0), get_n(0)))
+t = ((get_n(0), get_n(0)), get_n(0))
+s = term_to_sequence(t)
+pprint(s)
+print eval_sequence(s, debug=True)
 # seq = apply_sequences(generate_get_i_get_j_sequence(2, 3), generate_get_i_get_j_sequence(4, 1))
 #seq = apply_sequences([(cards.get, 'l')], [(cards.get, 'l')])
 #
 #print sequence_to_str(seq)
-#print eval_sequence(seq)
+
 #print eval_sequence(seq)
 
 #pprint(dict(function_cache))

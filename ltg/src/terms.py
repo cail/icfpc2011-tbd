@@ -1,8 +1,8 @@
 from pprint import pprint
 
 from rules import card_by_name, cards
-from rules import LEFT_APP, RIGHT_APP, card_by_name, apply, cards
-from rules import IntValue, Context, AbstractFunction, Error
+from rules import LEFT_APP, RIGHT_APP, apply
+from rules import IntValue, Context, AbstractFunction
 
 App = tuple
 
