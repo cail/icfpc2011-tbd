@@ -1,3 +1,4 @@
 .metadata
 *.pyc
 *.rpl
+/ltg/src/replay.txt

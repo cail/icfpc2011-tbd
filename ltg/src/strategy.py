@@ -6,11 +6,13 @@ from rules import cards, LEFT_APP, RIGHT_APP
 
 __all__ = [
           'Strategy',
+          'IdleStrategy',
           'GenerateValueStrategy',
           'SequenceStrategy',
           'ApplicationSequenceStrategy',
           'RepeatStrategy',
           'AppNTo0Strategy',
+          'AppFIJNStrategy',
           ]
 
 
@@ -59,6 +61,7 @@ class GenerateValueStrategy(Strategy):
             self.intermediate_targets.append(target)
         self.slot = slot
         self.slot_value = 0
+        self.inited = False
         self.zeroed = False
         #self.turns = target + 1
 
@@ -76,11 +79,14 @@ class GenerateValueStrategy(Strategy):
 
     def pop_move(self):
         #self.turns = self.turns - 1
-        if self.target == self.slot_value:
-            return None
+        if not self.inited:
+            self.inited = True
+            return (LEFT_APP, self.slot, cards.put)
         elif not self.zeroed:
             self.zeroed = True
             return (RIGHT_APP, self.slot, cards.zero)
+        elif self.target == self.slot_value:
+            return None
         elif self.slot_value == 0:
             self.slot_value = self.slot_value + 1
             return (LEFT_APP, self.slot, cards.succ)
@@ -187,7 +193,8 @@ class AppNTo0Strategy(SequenceStrategy):
         self.slot = slot
         self.n_slot = n_slot
         self.strategies = [
-                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, cards.zero),
+                           ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.put),
+                                                       (RIGHT_APP, self.slot, cards.zero),
                                                       ),
                            RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.succ))),
                            ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.get),
@@ -199,13 +206,25 @@ class AppNTo0Strategy(SequenceStrategy):
                           ]
 
 
-class SimpleAttackStrategy(SequenceStrategy):
-    def __init__(self, slot, i_slot, j_slot, n_slot):
+class AppFIJNStrategy(SequenceStrategy):
+    def __init__(self, slot, f_card, i_num, j_num, n_num):
         self.slot = slot
-        self.i_slot = slot
-        self.j_slot = slot
-        self.n_slot = slot
+        self.interm_slot = 1
+        self.f_card = f_card
+        self.i_num = i_num
+        self.j_num = j_num
+        self.n_num = n_num
         self.strategies = [
-                           AppNTo0(), #
+                           ApplicationSequenceStrategy((LEFT_APP, self.interm_slot, cards.put),
+                                                       (RIGHT_APP, self.interm_slot, self.f_card),
+                                                      ),
+                           GenerateValueStrategy(slot = 0, target = self.i_num),
+                           AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
+                           GetIStrategy(slot = self.interm_slot, i_slot = self.slot),
+                           GenerateValueStrategy(slot = 0, target = self.j_num),
+                           AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
+                           GetIStrategy(slot = self.interm_slot, i_slot = self.slot),
+                           GenerateValueStrategy(slot = 0, target = self.n_num),
+                           AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
                           ]
 

@@ -3,9 +3,10 @@ from time import clock
 
 from arena import Arena
 from bot import IdleBot, RandomBot, InteractiveBot
-from strategy_bot import StrategyBot
 from bot_io import ThunkIo, DefaultInteractiveIo, QuietInteractiveIo, WriteReplayIo, ReadReplayIo, CompetitionIo, CompositeIo
-from strategy import GenerateValueStrategy, GetIStrategy, AppNTo0Strategy, SequenceStrategy, IdleStrategy
+from rules import cards
+from strategy import GenerateValueStrategy, GetIStrategy, AppNTo0Strategy, SequenceStrategy, IdleStrategy, AppFIJNStrategy
+from strategy_bot import StrategyBot
 
 
 if __name__ == '__main__':
@@ -46,11 +47,33 @@ if __name__ == '__main__':
         strategy_bot_test = StrategyBot(bot_io = CompositeIo(game_io, WriteReplayIo(fd = rpl_fd)))
         strategy_bot_test.add_strategy(
                 SequenceStrategy(
-                                 GenerateValueStrategy(slot = 0, target = 15),
-                                 GenerateValueStrategy(slot = 1, target = 3),
-                                 GenerateValueStrategy(slot = 3, target = 15),
-                                 AppNTo0Strategy(slot = 2, n_slot = 4),
-                                 GetIStrategy(slot = 100, i_slot = 1),
+                                 #GenerateValueStrategy(slot = 0, target = 15),
+                                 #GenerateValueStrategy(slot = 1, target = 3),
+                                 #GenerateValueStrategy(slot = 3, target = 15),
+                                 #AppNTo0Strategy(slot = 2, n_slot = 4),
+                                 #GetIStrategy(slot = 100, i_slot = 1),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
                                  #IdleStrategy(),
                                 ))
         arena_strategy = Arena(arena_io = game_io,

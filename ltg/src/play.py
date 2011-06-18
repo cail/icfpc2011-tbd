@@ -33,8 +33,9 @@ def receive_move():
     card = card_by_name[card]
     return direction, slot, card    
     
-    
-if __name__ == '__main__':
+def main(*argv):
+    if not argv: 
+        argv = None
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--replay', type=argparse.FileType('w'),
@@ -45,7 +46,7 @@ if __name__ == '__main__':
                         help='if number is provided, script interacts '
                         'in official way, and another bot is ignored')
     
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     replay = args.replay
     
     game = Game()
@@ -80,4 +81,7 @@ if __name__ == '__main__':
         
     if replay is not None:
         replay.close()
-    print>>sys.stderr, 'game ended at half turn', game.half_moves
+    print>>sys.stderr, 'game ended at half turn', game.half_moves    
+    
+if __name__ == '__main__':
+    main()
