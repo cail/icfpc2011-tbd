@@ -4,6 +4,7 @@ import sys
 
 import rules
 from game import Game
+from bot_io import QuietInteractiveIo
 
 TABLE_WIDTH = 16
 STEPS_PER_PAGE = 100
@@ -74,7 +75,7 @@ def write_page(h, number, name):
         f.write("</html>")
 
 def main(name="vis_output"):
-    game = Game()
+    game = Game(game_io = QuietInteractiveIo())
     h = html.HTML()
     step_count = 0  # this will eventually include zombie moves
     
