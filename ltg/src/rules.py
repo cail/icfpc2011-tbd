@@ -20,7 +20,7 @@ SLOTS = 256
 MAX_SLOT = SLOTS - 1
 INITIAL_VITALITY = 10000
 MAX_APPLICATIONS = 1000
-MAX_TURNS = 10 # REDUCED FOR TESTING (originally 10**5)
+MAX_TURNS = 100 # REDUCED FOR TESTING (originally 10**5)
 
 LEFT_APP = 'l'
 RIGHT_APP = 'r'
@@ -285,7 +285,7 @@ class Help(Function):
         return Help1.create(arg)    
 
 
-class Help1(Function):
+class Help1(Help):
     def __init__(self, i):
         self.i = i
     def apply(self, arg, context):
@@ -294,7 +294,7 @@ class Help1(Function):
         return self.partial_str(self.i)
 
 
-class Help2(Function):
+class Help2(Help):
     def __init__(self, i, j):
         self.i = i
         self.j = j
@@ -344,7 +344,7 @@ class Zombie(Function):
         return Zombie1.create(arg)    
 
 
-class Zombie1(Function):
+class Zombie1(Zombie):
     def __init__(self, i):
         self.i = i
     def apply(self, arg, context):
@@ -357,7 +357,7 @@ class Zombie1(Function):
         opp.vitalities[MAX_SLOT-self.i] = -1
         return cards.I
     def __str__(self):
-        return self.partial_str(self.i, self.j)
+        return self.partial_str(self.i)
 
 
 class cards(object):

@@ -2,7 +2,7 @@
 from time import clock
 
 from arena import Arena
-from bot import IdleBot, InteractiveBot
+from bot import IdleBot, RandomBot, InteractiveBot
 from strategy_bot import StrategyBot
 from bot_io import ThunkIo, DefaultInteractiveIo, QuietInteractiveIo, WriteReplayIo, ReadReplayIo, CompositeIo
 from strategy import GenerateValueStrategy, AppNTo0Strategy, SequenceStrategy
@@ -17,17 +17,23 @@ if __name__ == '__main__':
     
     with open('../../replays/test.rpl', 'r') as rpl_fd:
         # Replay playback
-        arena3 = Arena(arena_io = game_io,
+        arenaReplay = Arena(arena_io = game_io,
                        bot1 = InteractiveBot(bot_io = CompositeIo(ReadReplayIo(fd = rpl_fd), game_io)),
                        bot2 = InteractiveBot(bot_io = CompositeIo(ReadReplayIo(fd = rpl_fd), thunk_io)))
-        #arena3.fight()
+        #arenaReplay.fight()
 
     with open('../../replays/test.rpl', 'w') as rpl_fd:
         # Interactive against idle
-        arena1 = Arena(arena_io = game_io,
+        arenaInteractive = Arena(arena_io = game_io,
                        bot1 = InteractiveBot(bot_io = game_io),
                        bot2 = IdleBot(bot_io = thunk_io))
-        #arena1.fight()
+        #arenaInteractive.fight()
+    
+        # Two randoms duking it out
+        arenaRandom = Arena(arena_io = game_io,
+                       bot1 = RandomBot(bot_io = CompositeIo(game_io, WriteReplayIo(fd = rpl_fd))),
+                       bot2 = RandomBot(bot_io = thunk_io))
+        arenaRandom.fight()
     
         # Non-interactive faux strat against idle with replay
         strategy_bot_test = StrategyBot(bot_io = CompositeIo(game_io, WriteReplayIo(fd = rpl_fd)))
@@ -37,10 +43,10 @@ if __name__ == '__main__':
                                  GenerateValueStrategy(slot = 1, target = 3),
                                  GenerateValueStrategy(slot = 3, target = 15),
                                  AppNTo0Strategy(slot = 2, n_slot = 4)))
-        arena2 = Arena(arena_io = game_io,
+        arenaStrategy = Arena(arena_io = game_io,
                        bot1 = IdleBot(bot_io = thunk_io),
                        bot2 = strategy_bot_test)
-        arena2.fight()
+        #arenaStrategy.fight()
 
     game_io.notify_total_time(clock() - start)
 
