@@ -124,14 +124,14 @@ Also, the proper terminating EOL is added to output if not present.  '''
     if os.name == 'nt':
         def expander(s):
             lst = glob.glob(s)
-            assert len(lst), 'Pattern or file name {!r} didn\'t match any files'.format(s)
+            assert len(lst), 'Pattern or file name {0!r} didn\'t match any files'.format(s)
             lst = filter(os_path.isfile, lst)
-            assert len(lst), 'Pattern or file name {!r} match only directories'.format(s)
+            assert len(lst), 'Pattern or file name {0!r} match only directories'.format(s)
             return lst
         args.files = map_many(expander, args.files)
     else:
         def expander(s):
-            assert os_path.exists(s), 'File {!r} doesn\'t exist'.format(s)
+            assert os_path.exists(s), 'File {0!r} doesn\'t exist'.format(s)
             if not os_path.isfile(s): return []
             return [s]
         if len(args.files):
@@ -172,14 +172,14 @@ def process_file_preview(input, fname, output, msg_output, args):
                 fname_printed = True
             # properly format result even if it has newlines
             rs = r.split('\n') 
-            output.write('line {}:\n- {}\n'.format(line, s))
+            output.write('line {0}:\n- {1}\n'.format(line, s))
             for it in rs:
-                output.write('+ {}\n'.format(it))
+                output.write('+ {0}\n'.format(it))
             if unbuffered: output.flush()
     if substitutions:
-        output.write('({} substitutions)\n'.format(substitutions))
+        output.write('({0} substitutions)\n'.format(substitutions))
     elif args.no_matches:
-        output.write('{} ({} substitutions)\n'.format(fname, substitutions))
+        output.write('{0} ({1} substitutions)\n'.format(fname, substitutions))
     output.flush()
     return substitutions
 
@@ -199,7 +199,7 @@ def process_file_sequential(input, fname, output, msg_output, args):
     output.flush()
     if substitutions or args.no_matches:
         msg_output.flush()
-        msg_output.write('{} ({} substitutions)\n'.format(fname, substitutions))
+        msg_output.write('{0} ({1} substitutions)\n'.format(fname, substitutions))
         msg_output.flush()
     return substitutions
 
@@ -214,7 +214,7 @@ def process_file_multiline(input, fname, output, msg_output, args):
         if r and r[-1] != '\n': output.write('\n')
     if n or args.no_matches:
         msg_output.flush()
-        msg_output.write('{} ({} substitutions)\n'.format(fname, n))
+        msg_output.write('{0} ({1} substitutions)\n'.format(fname, n))
         msg_output.flush()
     return n
 
