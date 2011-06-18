@@ -98,4 +98,4 @@ class PlaybackBot(Bot):
         slot = int(slot)
         card = card_by_name[card]
         return dir, slot, card
-         
+
