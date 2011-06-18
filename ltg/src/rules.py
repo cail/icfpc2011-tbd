@@ -25,6 +25,8 @@ MAX_TURNS = 100000
 LEFT_APP = 'l'
 RIGHT_APP = 'r'
 
+MEMOIZE_FUNCTIONS = True
+
 class Error(Exception):
     pass
 
@@ -76,13 +78,19 @@ def apply(f, arg, context):
 function_cache = defaultdict(dict)
 
 class Function(object):
-    @classmethod
-    def create(cls, *args):
-        # TODO: put memoization shit into separate module
-        cache = function_cache[cls]
-        if args not in cache:
-            cache[args] = cls(*args)
-        return cache[args]
+    if MEMOIZE_FUNCTIONS:
+        @classmethod
+        def create(cls, *args):
+            # TODO: put memoization shit into separate module
+            cache = function_cache[cls]
+            if args not in cache:
+                cache[args] = cls(*args)
+            return cache[args]
+    else:
+        @classmethod
+        def create(cls, *args):
+            return cls(*args)
+        
     def apply(self, arg, context):
         raise NotImplementedError()
     def __str__(self):
@@ -112,10 +120,12 @@ class AbstractFunction(Function):
 
 class IntValue(int): # not a Function -- because it's not!
     # we are not memoizing ints, so no need for create function
-    def __init__(self, value):
-        int.__init__(self, value)
     def apply(self, arg, context):
         raise Error('Attempt to apply an integer')
+    def __str__(self):
+        if self == 0:
+            return 'zero'
+        return int.__str__(self)
     # hash and comparison are taken from int, so it's ok
 
 
@@ -385,4 +395,3 @@ def _init_canonical_names():
     for name, card in card_by_name.iteritems():
         card.__class__.canonical_name = name
 _init_canonical_names()
-
