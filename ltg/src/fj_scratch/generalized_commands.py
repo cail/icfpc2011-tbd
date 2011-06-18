@@ -86,8 +86,19 @@ def generate_get_i_get_j_sequence(i, j):
     return apply_sequences(generate_get_n_sequence(i),
                            generate_get_n_sequence(j))    
 
-def generate_number_applicative(n):
 
+def generate_number_applicative(n):
+    t = []
+    while n > 0:
+        if n %2 == 1:
+            t.append(cards.succ)
+        n /= 2
+        if n == 0:
+            break
+        t.append(cards.dbl)
+    t.append(cards.zero)
+    t.reverse()
+    return t
 
     
 seq = apply_sequences(generate_get_i_get_j_sequence(2, 3), generate_get_i_get_j_sequence(4, 1))

@@ -23,12 +23,12 @@ if __name__ == '__main__':
                    bot2 = RandomBot(bot_io = competition_io))
     #arena_competition.fight()
 
-    with open('../../replays/test.rpl', 'r') as rpl_fd:
-        # Replay playback
-        arena_replay = Arena(arena_io = game_io,
-                       bot1 = InteractiveBot(bot_io = CompositeIo(ReadReplayIo(fd = rpl_fd), game_io)),
-                       bot2 = InteractiveBot(bot_io = CompositeIo(ReadReplayIo(fd = rpl_fd), thunk_io)))
-        #arena_replay.fight()
+#    with open('../../replays/test.rpl', 'r') as rpl_fd:
+#        # Replay playback
+#        arena_replay = Arena(arena_io = game_io,
+#                       bot1 = InteractiveBot(bot_io = CompositeIo(ReadReplayIo(fd = rpl_fd), game_io)),
+#                       bot2 = InteractiveBot(bot_io = CompositeIo(ReadReplayIo(fd = rpl_fd), thunk_io)))
+#        #arena_replay.fight()
 
     with open('../../replays/test.rpl', 'w') as rpl_fd:
         # Interactive against idle
