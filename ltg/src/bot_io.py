@@ -1,5 +1,6 @@
 
 from rules import card_by_name, SLOTS, LEFT_APP, RIGHT_APP
+import sys
 
 
 __all__ = [
@@ -245,10 +246,12 @@ class CompetitionIo(QuietInteractiveIo):
             print '1'
             print card
             print slot
+            sys.stdout.flush()
         else:
             print '2'
             print slot
             print card
+            sys.stdout.flush()
 
 class CompositeIo(BotIo):
     def __init__(self, *args):
