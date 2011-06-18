@@ -5,6 +5,7 @@ from rules import LEFT_APP, RIGHT_APP, apply
 from rules import IntValue, Context, AbstractFunction
 from abselim import eliminate_abstraction
 
+
 App = tuple
 
 
@@ -49,7 +50,7 @@ def binarize_term(term):
     return term
 
 
-def subterms(term):
+def subterms(*terms):
     'in postorder'
     result = []
     visited = set()
@@ -61,12 +62,28 @@ def subterms(term):
         if term not in visited:
             visited.add(term)
             result.append(term)
-    rec(term)
+    map(rec, terms)
     return result
  
+ 
+def replace_leaf_subterm(template, pattern, term):
+     if term == template:
+         return pattern
+     if isinstance(term, App):
+         left, right = term
+         return (replace_leaf_subterm(template, pattern, left), 
+                 replace_leaf_subterm(template, pattern, right))
+     return term
+ 
+assert replace_leaf_subterm((1,2), (3, 4), ((1, 2), (3, 4))) == ((3, 4), (3, 4))
+     
 
-def estimate_costs(term):
-    st = subterms(term)
+def optimal_subterm(register_cost, *terms):
+    '''(subterm, advantage) or None
+    
+    Find best subterm to put to temporary slot
+    '''
+    st = subterms(*terms)
     cost = {}
     for t in st:
         if isinstance(t, App):
@@ -77,7 +94,23 @@ def estimate_costs(term):
                 cost[t] = cost[left]+3*(cost[right]-1)+1
         else:
             cost[t] = 1
-    return cost[term]
+    weight = dict.fromkeys(st, 0)
+    for t in terms:
+        weight[t] += 1
+    for t in reversed(st):
+        if isinstance(t, App):
+            left, right = t
+            weight[left] += weight[t]
+            if cost[left] == 1:
+                weight[right] += weight[t]
+            else:
+                weight[right] += weight[t]*3
+    
+    def key(t):
+        return (cost[t]-register_cost)*(weight[t]-1)
+    result = max(st, key=key)
+    if key(result) > 0:
+        return result, key(result)
 
 
 def check_term(term):
@@ -152,6 +185,7 @@ if __name__ == '__main__':
     pprint(t)
     
     t = binarize_term(t)
+    print 'optimal subterm', optimal_subterm(3, t)
     s = term_to_sequence(t)
     
     print 'sequence of length', len(s)
