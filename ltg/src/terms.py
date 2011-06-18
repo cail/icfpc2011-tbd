@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from rules import card_by_name, cards
 from rules import LEFT_APP, RIGHT_APP, card_by_name, apply, cards
 from rules import IntValue, Context, AbstractFunction, Error
@@ -84,14 +86,19 @@ def apply_sequences(left, right):
 def term_to_sequence(term):
     if isinstance(term, App):
         left, right = term
+        if not isinstance(left, App):
+            return term_to_sequence(right)+[(left, 'l')]
         return apply_sequences(term_to_sequence(left), term_to_sequence(right))
     return [(term, 'r')]
 
 
 if __name__ == '__main__':
-    t = ((cards.inc, number_term(4)), (cards.get, number_term(5))) 
-    print term_to_str(t)
+    t = ((cards.get, number_term(4)), (cards.get, number_term(5))) 
+    #print term_to_str(t)
+    pprint(t)
+    
     s = term_to_sequence(t)
+    
     print 'sequence of length', len(s)
     print sequence_to_str(s)
     
