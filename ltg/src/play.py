@@ -60,8 +60,8 @@ def main(*argv):
     bots = [ctr1(game), ctr2(game)]
 
     while not game.is_finished():
-        if game.half_moves % 1000 == 0:
-            print>>sys.stderr, 'half turn', game.half_moves
+        #if game.half_moves % 1000 == 0:
+        #    print>>sys.stderr, 'half turn', game.half_moves
         if game.half_moves >= args.maxturns:
             break
         if game.has_zombie_phase():

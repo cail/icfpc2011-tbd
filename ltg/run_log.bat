@@ -1,1 +1,1 @@
-@python src/play.py --replay hz.rpl RandomBot RandomBot %1
+@python src/play.py --replay our.rpl RandomBot RandomBot %1

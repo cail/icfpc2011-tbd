@@ -1,1 +1,0 @@
-ltg.win32.exe -silent false match "run_log.bat" "run_simple.bat" 2>log.log
