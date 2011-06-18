@@ -5,7 +5,7 @@ from game import Game
 from simple_bot import PlaybackBot
 from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 
-SIZE = 4 # how many head and tail moves we show
+SIZE = 200 # how many head and tail moves we show
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

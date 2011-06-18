@@ -1,1 +1,1 @@
-@python src/play.py --replay our.rpl RandomBot RandomBot %1
+@python src/play.py --replay our.rpl test_seq_bot() IdleBot %1
