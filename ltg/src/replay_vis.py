@@ -14,13 +14,16 @@ def is_init(player, slot):
            player.values[slot] == rules.cards.I
 
 def cell(h, player, slot):
-    with (h.td(klass='active') if not is_init(player, slot) else h.td):
-        h.text(str(player.vitalities[slot]))
-        h.br
-        h.text(str(player.values[slot]))
+    with h.td as c:
+        if is_init(player, slot):
+            pass
+        else:
+            c.text(str(player.vitalities[slot]))
+            c.br
+            c.text(str(player.values[slot]))
         
 def table(h, player):
-    with h.table(border='1') as t:
+    with h.table(klass='slots') as t:
         for row in xrange(rules.SLOTS / TABLE_WIDTH):
             with t.tr() as r:
                 for col in xrange(TABLE_WIDTH):
@@ -68,9 +71,11 @@ def process_move(h, game, move):
 def write_page(h, number, name):
     number = '' if number == 0 else str(number)
     filename = name + number + '.html'
-    css = '<style type="text/css">table{font-size: smaller;} .active{background-color:#DDDDDD}</style>\n'
+    doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"\n"http://www.w3.org/TR/html4/strict.dtd">'
+    #css = '<style type="text/css">table{font-size: smaller;} .active{background-color:#DDDDDD}</style>\n'
+    css = '<style type="text/css">table.slots{border-collapse: collapse; } table.slots td{min-width:30px; height:30px; border: 1px solid black; font-size: 10px;}</style>\n'
     with open(filename, 'w') as f:
-        f.write("<head>\n"+css+"</head>\n<html>")
+        f.write(doctype + "<head>\n" + css + "</head>\n<html>")
         f.write(str(h))
         f.write("</html>")
 
@@ -91,6 +96,7 @@ def main(name="vis_output"):
             write_page(h, (step_count - 1) // STEPS_PER_PAGE, name)
     if step_count % STEPS_PER_PAGE > 0:
         write_page(h, step_count // STEPS_PER_PAGE, name)
+        h = html.HTML()
     
     
 if __name__ == '__main__':
