@@ -1,5 +1,7 @@
+
 from rules import INITIAL_VITALITY, SLOTS, MAX_TURNS, LEFT_APP, RIGHT_APP
 from rules import apply, cards, Context, Error
+from bot_io import ThunkIo
 
 __all__ = [
     'Game',
@@ -19,11 +21,15 @@ class Player(object):
 
     
 class Game(object):
-    def __init__(self, game_io):
-        self.io = game_io
+    def __init__(self, game_io = None):
+        if game_io == None:
+            self.io = ThunkIo()
+        else:
+            self.io = game_io
         self.players = [Player(), Player()]
         self.proponent, self.opponent = self.players
         self.half_moves = 0
+        self.move_history = []
 
         #self.proponent.vitalities[13] = -1
         #self.proponent.values[13] = zero
@@ -38,23 +44,26 @@ class Game(object):
             
     def zombie_phase(self):
         prop = self.proponent
-        self.io.diag('zombie phase')
+        if self.io:
+            self.io.diag('zombie phase')
         for i in range(SLOTS):
             if prop.vitalities[i] == -1:
-                self.io.diag('zombie in slot' + str(i) + 'is applied to I')
+                if self.io:
+                    self.io.diag('zombie in slot' + str(i) + 'is applied to I')
                 z = prop.values[i]
                 context = Context(self, zombie=True)
                 try:
                     _ = apply(z, cards.I, context) # not interested in result
                 except Error as e:
-                    self.io.diag(str(e))
+                    if self.io: 
+                        self.io.diag(str(e))
                 prop.values[i] = cards.I
                 prop.vitalities[i] = 0
-                self.io.diag('zombie is rested')
+                if self.io:
+                    self.io.diag('zombie is rested')
             
     def make_half_move(self, direction, slot, card):
-        import warnings
-            
+        self.move_history.append((direction, slot, card))
         self.apply(
             slot, 
             card, 
@@ -77,7 +86,8 @@ class Game(object):
                 assert False
             self.proponent.values[slot] = result
         except Error as e:
-            self.io.diag('Error:' + str(e))
+            if self.io:
+                self.io.diag('Error:' + str(e))
             self.proponent.values[slot] = cards.I
             
         

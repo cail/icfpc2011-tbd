@@ -80,7 +80,7 @@ def write_page(h, number, name):
         f.write("</html>")
 
 def main(name="vis_output"):
-    game = Game(QuietInteractiveIo())
+    game = Game(game_io = QuietInteractiveIo())
     h = html.HTML()
     step_count = 0  # this will eventually include zombie moves
     

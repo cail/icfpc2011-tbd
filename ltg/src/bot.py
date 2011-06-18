@@ -1,4 +1,3 @@
-
 import random
 
 from rules import cards, card_by_name, SLOTS, LEFT_APP, RIGHT_APP
@@ -67,4 +66,5 @@ class InteractiveBot(Bot):
 
     def make_move_impl(self):
         return self.io.read_move()
+
 

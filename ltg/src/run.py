@@ -6,10 +6,7 @@ import bot as B
 from arena import Arena
 from bot_io import QuietInteractiveIo, CompetitionIo
 
-if __name__ == '__main__':
-    botname = sys.argv[1]
-    player = int(sys.argv[2])
-        
+def main(botname, player):
     competition_io = CompetitionIo()
     quiet_interactive_io = QuietInteractiveIo()
     
@@ -26,4 +23,8 @@ if __name__ == '__main__':
         arena_competition.fight()
     except EOFError:
         pass
+    
+if __name__ == '__main__':
+    main(sys.argv[1], int(sys.argv[2]))
+        
         
