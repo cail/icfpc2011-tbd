@@ -6,11 +6,13 @@ from rules import cards, LEFT_APP, RIGHT_APP
 
 __all__ = [
           'Strategy',
+          'IdleStrategy',
           'GenerateValueStrategy',
           'SequenceStrategy',
           'ApplicationSequenceStrategy',
           'RepeatStrategy',
           'AppNTo0Strategy',
+          'AppFIJNStrategy',
           ]
 
 
@@ -204,24 +206,25 @@ class AppNTo0Strategy(SequenceStrategy):
                           ]
 
 
-class SimpleAttackStrategy(SequenceStrategy):
-    def __init__(self, slot, i_slot, j_slot, n_dmg):
+class AppFIJNStrategy(SequenceStrategy):
+    def __init__(self, slot, f_card, i_num, j_num, n_num):
         self.slot = slot
         self.interm_slot = 1
-        self.i_slot = i_slot
-        self.j_slot = j_slot
-        self.n_dmg = n_dmg
+        self.f_card = f_card
+        self.i_num = i_num
+        self.j_num = j_num
+        self.n_num = n_num
         self.strategies = [
                            ApplicationSequenceStrategy((LEFT_APP, self.interm_slot, cards.put),
-                                                       (RIGHT_APP, self.interm_slot, cards.attack),
+                                                       (RIGHT_APP, self.interm_slot, self.f_card),
                                                       ),
-                           GenerateValueStrategy(slot = 0, target = self.i_slot),
+                           GenerateValueStrategy(slot = 0, target = self.i_num),
                            AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
                            GetIStrategy(slot = self.interm_slot, i_slot = self.slot),
-                           GenerateValueStrategy(slot = 0, target = self.j_slot),
+                           GenerateValueStrategy(slot = 0, target = self.j_num),
                            AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
                            GetIStrategy(slot = self.interm_slot, i_slot = self.slot),
-                           GenerateValueStrategy(slot = 0, target = self.n_dmg),
+                           GenerateValueStrategy(slot = 0, target = self.n_num),
                            AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
                           ]
 

@@ -3,9 +3,10 @@ from time import clock
 
 from arena import Arena
 from bot import IdleBot, RandomBot, InteractiveBot
-from strategy_bot import StrategyBot
 from bot_io import ThunkIo, DefaultInteractiveIo, QuietInteractiveIo, WriteReplayIo, ReadReplayIo, CompetitionIo, CompositeIo
-from strategy import GenerateValueStrategy, GetIStrategy, AppNTo0Strategy, SequenceStrategy, IdleStrategy, SimpleAttackStrategy
+from rules import cards
+from strategy import GenerateValueStrategy, GetIStrategy, AppNTo0Strategy, SequenceStrategy, IdleStrategy, AppFIJNStrategy
+from strategy_bot import StrategyBot
 
 
 if __name__ == '__main__':
@@ -51,8 +52,29 @@ if __name__ == '__main__':
                                  #GenerateValueStrategy(slot = 3, target = 15),
                                  #AppNTo0Strategy(slot = 2, n_slot = 4),
                                  #GetIStrategy(slot = 100, i_slot = 1),
-                                 SimpleAttackStrategy(slot = 2, i_slot = 3, j_slot = 3, n_dmg = 1024),
-                                 IdleStrategy(),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.help, i_num = 3, j_num = 3, n_num = 8192),
+                                 AppFIJNStrategy(slot = 2, f_card = cards.attack, i_num = 3, j_num = 3, n_num = 1024),
+                                 #IdleStrategy(),
                                 ))
         arena_strategy = Arena(arena_io = game_io,
                        bot1 = IdleBot(bot_io = thunk_io),
