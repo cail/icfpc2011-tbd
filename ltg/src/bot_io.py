@@ -243,18 +243,12 @@ class CompetitionIo(QuietInteractiveIo):
         direction, slot, card = prop_move
         if direction == LEFT_APP:
             print '1'
-            if card == 0:
-                print 'zero'
-            else:
-                print str(card)
+            print card
             print slot
         else:
             print '2'
             print slot
-            if card == 0:
-                print 'zero'
-            else:
-                print str(card)
+            print card
 
 class CompositeIo(BotIo):
     def __init__(self, *args):
