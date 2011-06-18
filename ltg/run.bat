@@ -1,1 +1,1 @@
-@python src/run.py IdleBot %1 
+@python src/run.py RandomBot %1 

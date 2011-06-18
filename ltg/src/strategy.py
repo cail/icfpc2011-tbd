@@ -152,6 +152,20 @@ class RepeatStrategy(Strategy):
         return move
 
 
+class GetIStrategy(SequenceStrategy):
+    def __init__(self, slot, i_slot):
+        self.slot = slot
+        self.i_slot = i_slot
+        self.strategies = [
+                           ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.put),
+                                                       (RIGHT_APP, self.slot, cards.zero),
+                                                      ),
+                           RepeatStrategy(n = self.i_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.succ))),
+                           ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.get),
+                                                      ),
+                          ]
+
+
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 2) (get 0))
 # Vlad Shcherbina: found [0 r, Succ l, Succ l, Succ l, get l, K l, S l, get r, 0 r] -> ((get 3) (get 0))
 class AppNTo0Strategy(SequenceStrategy):
@@ -159,12 +173,23 @@ class AppNTo0Strategy(SequenceStrategy):
         self.slot = slot
         self.n_slot = n_slot
         self.strategies = [
-                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, cards.zero)),
+                           ApplicationSequenceStrategy((RIGHT_APP, self.slot, cards.zero),
+                                                      ),
                            RepeatStrategy(n = self.n_slot, strategy = ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.succ))),
                            ApplicationSequenceStrategy((LEFT_APP, self.slot, cards.get),
                                                        (LEFT_APP, self.slot, cards.K),
                                                        (LEFT_APP, self.slot, cards.S),
                                                        (RIGHT_APP, self.slot, cards.get),
-                                                       (RIGHT_APP, self.slot, cards.zero)),
+                                                       (RIGHT_APP, self.slot, cards.zero),
+                                                      ),
                           ]
 
+
+class SimpleAttackStrategy(SequenceStrategy):
+    def __init__(self, slot, i_slot, j_slot, n_slot):
+        self.slot = slot
+        self.i_slot = slot
+        self.j_slot = slot
+        self.n_slot = slot
+        self.strategies = [
+                          ]

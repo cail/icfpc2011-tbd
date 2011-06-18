@@ -1,41 +1,30 @@
+
 import sys
 
 import bot as B
 
-def read_move(bot):
-    direction = int(raw_input())
-    if direction == 1:
-        card = raw_input()
-        slot = int(raw_input())
-    else:
-        slot = int(raw_input())
-        card = raw_input()
-    bot.receive_move(direction, slot, card)
+from arena import Arena
+from bot_io import QuietInteractiveIo, CompetitionIo
 
-def write_move(bot):
-    direction, slot, card = bot.make_move()
-    print direction
-    if direction == 1:
-        print card
-        print slot
-    else:
-        print slot
-        print card
+def main(botname, player):
+    competition_io = CompetitionIo()
+    quiet_interactive_io = QuietInteractiveIo()
     
-if __name__ == '__main__':
-    botname = sys.argv[1]
-    player = int(sys.argv[2])
-        
-    bot = getattr(B, botname)()
-    bot.begin_game(player)
-    
+    prop_bot = getattr(B, botname)(bot_io = competition_io)
+    opp_bot = B.InteractiveBot(bot_io = quiet_interactive_io)
+
     if player == 0:
-        write_move(bot)
-    
+        bot1, bot2 = prop_bot, opp_bot
+    else:
+        bot2, bot1 = prop_bot, opp_bot
+
     try:
-        while True:
-            read_move(bot)
-            write_move(bot)
+        arena_competition = Arena(arena_io = quiet_interactive_io, bot1 = bot1, bot2 = bot2)
+        arena_competition.fight()
     except EOFError:
         pass
+    
+if __name__ == '__main__':
+    main(sys.argv[1], int(sys.argv[2]))
+        
         

@@ -88,13 +88,11 @@ def generate_get_i_get_j_sequence(i, j):
                            generate_get_n_sequence(j))    
 
     
-seq = generate_get_i_get_j_sequence(7, 3)
+seq = generate_get_i_get_j_sequence(2, 3)
 
-
-print len(seq), 'moves'
 print sequence_to_str(seq)
 print eval_sequence(seq)
-print eval_sequence(seq)
+#print eval_sequence(seq)
 
 #pprint(dict(function_cache))
 

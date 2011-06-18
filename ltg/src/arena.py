@@ -9,7 +9,7 @@ __all__ = [
 class Arena(object):
     def __init__(self, arena_io, bot1, bot2):
         self.io = arena_io
-        self.game = Game(silent = False)
+        self.game = Game(game_io = arena_io)
         self.bots = bot1, bot2
 
     def fight(self):
