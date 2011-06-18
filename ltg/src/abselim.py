@@ -144,11 +144,15 @@ class Lambda:
         return False
 
 
+def eliminate_abstraction(s):
+    return parse('(' + s + ')')[0].transform().dump()
+
+
 if __name__ == '__main__':
     while True:
         sys.stdout.write('>>> ');
         try:
-            print parse('(' + sys.stdin.readline() + ')')[0].transform().dump()
+            print eliminate_abstraction(sys.stdin.readline())
         except LambdaParserException as e:
             print '\nError: ' + e.args[0]
 

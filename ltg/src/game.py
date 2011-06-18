@@ -21,8 +21,8 @@ class Player(object):
 
     
 class Game(object):
-    def __init__(self, game_io = None, silent=True):
-        self.silent = silent;
+    def __init__(self, game_io = None, output_level=0):
+        self.output_level = output_level;
         if game_io == None:
             self.io = ThunkIo()
         else:
@@ -89,9 +89,11 @@ class Game(object):
         except Error as e:
             if self.io:
                 self.io.diag('Error:' + str(e))
-            if not self.silent:
+            if self.output_level == 1:
                 print 'Exception: Native.Error'
-                #print str(e)
+            if self.output_level == 2:
+                print str(e)
+            if self.output_level > 0:
                 print 'slot {0} reset to I'.format(slot)
             self.proponent.values[slot] = cards.I
             

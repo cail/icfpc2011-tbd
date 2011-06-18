@@ -3,6 +3,7 @@ from pprint import pprint
 from rules import card_by_name, cards
 from rules import LEFT_APP, RIGHT_APP, apply
 from rules import IntValue, Context, AbstractFunction
+from abselim import eliminate_abstraction
 
 App = tuple
 
@@ -37,6 +38,15 @@ def eval_sequence(commands, start=cards.I, debug=False):
             print cmd, side, ':', state
     return state
 
+
+def binarize_term(term):
+    '(f, x, y) -> ((f, x), y), etc.'
+    if isinstance(term, App):
+        result = term[0]
+        for t in term[1:]:
+            result = (result, binarize_term(t))
+        return result
+    return term
 
 def check_term(term):
     if isinstance(term, App):
@@ -92,11 +102,23 @@ def term_to_sequence(term):
     return [(term, 'r')]
 
 
+def parse_term(s, locals={}):
+    s = s.replace(' ', ', ')
+    for card_name in card_by_name:
+        s = s.replace(card_name, 'cards.'+card_name)
+    return eval(s, globals(), locals)
+
+
+def parse_lambda(s, locals={}):
+    return parse_term(eliminate_abstraction(s), locals)
+
+
 if __name__ == '__main__':
     t = ((cards.get, number_term(4)), (cards.get, number_term(5))) 
     #print term_to_str(t)
     pprint(t)
     
+    t = binarize_term(t)
     s = term_to_sequence(t)
     
     print 'sequence of length', len(s)
