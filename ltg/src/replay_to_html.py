@@ -5,7 +5,8 @@ from game import Game
 from simple_bot import PlaybackBot
 from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 
-SIZE = 200 # how many head and tail moves we show
+HEAD = 200 # how many head and tail moves we show
+TAIL = 20
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -39,9 +40,9 @@ if __name__ == '__main__':
             print>>html, '<hr/>replay prematurely ended'
             break
         
-        show = game.half_moves < SIZE or game.half_moves >= len(replay)-SIZE
+        show = game.half_moves < HEAD or game.half_moves >= len(replay)-TAIL
         
-        if game.half_moves == SIZE and game.half_moves < len(replay)-SIZE:
+        if game.half_moves == HEAD and game.half_moves < len(replay)-TAIL:
             print>>html, '<h1>...</h1>'*3
         
         
