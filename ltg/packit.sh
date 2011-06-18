@@ -1,2 +1,2 @@
 #!/bin/sh
-tar -czf subx.tgz --exclude *.pyc src install run
+git archive -v --format=tar -o submission.tar HEAD src install run

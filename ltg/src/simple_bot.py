@@ -99,4 +99,3 @@ class PlaybackBot(Bot):
         card = card_by_name[card]
         return dir, slot, card
          
-         

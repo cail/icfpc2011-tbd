@@ -1,6 +1,8 @@
 .metadata
 *.pyc
 *.rpl
-/ltg/src/replay.txt
 *.log
 *.exe
+*.tar
+/ltg/src/replay.txt
+/ltg/our.html
