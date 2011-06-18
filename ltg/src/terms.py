@@ -89,11 +89,17 @@ def term_to_sequence(term):
 
 
 if __name__ == '__main__':
-    t = ((cards.get, number_term(4)), (cards.get, number_term(5))) 
+    t = ((cards.inc, number_term(4)), (cards.get, number_term(5))) 
     print term_to_str(t)
     s = term_to_sequence(t)
     print 'sequence of length', len(s)
     print sequence_to_str(s)
-    print eval_sequence(s)
+    
+    try:
+        print eval_sequence(s)
+    except Exception as e:
+        print '----'
+        print 'Error', e
+        print "don't worry, evaluation is not fully supported BECAUSE."
     
     
