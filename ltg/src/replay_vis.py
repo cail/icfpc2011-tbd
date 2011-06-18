@@ -94,9 +94,9 @@ def main(name="vis_output"):
         step_count += 1
         if step_count % STEPS_PER_PAGE == 0:
             write_page(h, (step_count - 1) // STEPS_PER_PAGE, name)
+            h = html.HTML()
     if step_count % STEPS_PER_PAGE > 0:
         write_page(h, step_count // STEPS_PER_PAGE, name)
-        h = html.HTML()
     
     
 if __name__ == '__main__':

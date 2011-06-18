@@ -71,7 +71,11 @@ if __name__ == '__main__':
             send_move(*move)
         game.make_half_move(*move)
         if replay is not None:
-            print>>replay, move[0], move[1], move[2]
+            if move[0] == 'l':
+                d = 1
+            else:
+                d = 2
+            print>>replay, d, move[1], move[2]
         
     if replay is not None:
         replay.close()
