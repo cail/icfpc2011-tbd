@@ -5,7 +5,7 @@ from arena import Arena
 from bot import IdleBot, RandomBot, InteractiveBot
 from strategy_bot import StrategyBot
 from bot_io import ThunkIo, DefaultInteractiveIo, QuietInteractiveIo, WriteReplayIo, ReadReplayIo, CompetitionIo, CompositeIo
-from strategy import GenerateValueStrategy, AppNTo0Strategy, SequenceStrategy
+from strategy import GenerateValueStrategy, GetIStrategy, AppNTo0Strategy, SequenceStrategy
 
 
 if __name__ == '__main__':
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     arena_competition = Arena(arena_io = game_io,
                    bot1 = InteractiveBot(bot_io = quiet_interactive_io),
                    bot2 = RandomBot(bot_io = competition_io))
-    arena_competition.fight()
+    #arena_competition.fight()
 
     with open('../../replays/test.rpl', 'r') as rpl_fd:
         # Replay playback
@@ -49,11 +49,13 @@ if __name__ == '__main__':
                                  GenerateValueStrategy(slot = 0, target = 15),
                                  GenerateValueStrategy(slot = 1, target = 3),
                                  GenerateValueStrategy(slot = 3, target = 15),
-                                 AppNTo0Strategy(slot = 2, n_slot = 4)))
+                                 AppNTo0Strategy(slot = 2, n_slot = 4),
+                                 GetIStrategy(slot = 100, i_slot = 1)
+                                ))
         arena_strategy = Arena(arena_io = game_io,
                        bot1 = IdleBot(bot_io = thunk_io),
                        bot2 = strategy_bot_test)
-        #arena_strategy.fight()
+        arena_strategy.fight()
 
     game_io.notify_total_time(clock() - start)
 
