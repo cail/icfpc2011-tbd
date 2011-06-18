@@ -1,7 +1,7 @@
 
 import copy
 
-from rules import cards, LEFT_APP, RIGHT_APP
+from rules import cards, MAX_SLOT, SLOTS, LEFT_APP, RIGHT_APP
 
 
 __all__ = [
@@ -13,6 +13,9 @@ __all__ = [
           'RepeatStrategy',
           'AppNTo0Strategy',
           'AppFIJNStrategy',
+          'BoostBattery',
+          'AttackSlot',
+          'DumbSlotKiller',
           ]
 
 
@@ -33,9 +36,23 @@ class Strategy(object):
         '''estimated priority of this strategy. 0 - minimal, 100 - superextremeimportant'''
         return 0
     
-    def pop_move(self):
+    def pop_move(self, game):
         '''return tuple (dir, slot, card_name)'''
         raise NotImplementedError()
+
+
+class NoneStrategy(Strategy):
+    def minimum_slots(self):
+        return 0
+
+    def available_moves(self):
+        return 100500
+
+    def current_priority(self):
+        return 0
+    
+    def pop_move(self, game):
+        return None
 
 
 class IdleStrategy(Strategy):
@@ -48,7 +65,7 @@ class IdleStrategy(Strategy):
     def current_priority(self):
         return 0
     
-    def pop_move(self):
+    def pop_move(self, game):
         return LEFT_APP, 0, cards.I
 
 
@@ -77,7 +94,7 @@ class GenerateValueStrategy(Strategy):
     def current_priority(self):
         return 0
 
-    def pop_move(self):
+    def pop_move(self, game):
         #self.turns = self.turns - 1
         if not self.inited:
             self.inited = True
@@ -114,9 +131,9 @@ class SequenceStrategy(Strategy):
     def current_priority(self):
         return 0
     
-    def pop_move(self):
+    def pop_move(self, game):
         for strategy in self.strategies:
-            move = strategy.pop_move()
+            move = strategy.pop_move(game)
             if move != None:
                 return move
         return None
@@ -137,7 +154,7 @@ class ApplicationSequenceStrategy(Strategy):
     def current_priority(self):
         return 0
     
-    def pop_move(self):
+    def pop_move(self, game):
         if len(self.apps) == 0:
             return None
         else:
@@ -159,8 +176,8 @@ class RepeatStrategy(Strategy):
     def current_priority(self):
         return 0
     
-    def pop_move(self):
-        move = self.cur_strategy.pop_move()
+    def pop_move(self, game):
+        move = self.cur_strategy.pop_move(game)
         if move == None:
             self.n = self.n - 1
             if self.n <= 0:
@@ -168,7 +185,7 @@ class RepeatStrategy(Strategy):
                 return None
             else:
                 self.cur_strategy = copy.deepcopy(self.strategy)
-                move = self.cur_strategy.pop_move()
+                move = self.cur_strategy.pop_move(game)
         return move
 
 
@@ -227,4 +244,48 @@ class AppFIJNStrategy(SequenceStrategy):
                            GenerateValueStrategy(slot = 0, target = self.n_num),
                            AppNTo0Strategy(slot = self.slot, n_slot = self.interm_slot),
                           ]
+
+class BoostBattery(AppFIJNStrategy):
+    def __init__(self, battery_slot, boost):
+        super(BoostBattery, self).__init__(battery_slot, cards.help, battery_slot, battery_slot, boost)
+
+class AttackSlot(AppFIJNStrategy):
+    def __init__(self, battery_slot, target_slot, dmg):
+        super(AttackSlot, self).__init__(battery_slot, cards.attack, battery_slot, (MAX_SLOT - target_slot), dmg)
+
+class DumbSlotKiller(Strategy):
+    def __init__(self, battery_slot, target_slot):
+        self.battery_slot = battery_slot
+        self.target_slot = target_slot
+        self.cur_strategy = None
+
+    def available_moves(self):
+        return 1
+
+    def current_priority(self):
+        return 0
+    
+    def pop_move(self, game):
+        if self.cur_strategy == None:
+            self.pick_strategy(game)
+            return self.cur_strategy.pop_move(game)
+        else:
+            move = self.cur_strategy.pop_move(game)
+            if move == None:
+                self.cur_strategy = None
+                return self.pop_move(game)
+            else:
+                return move
+
+    def pick_strategy(self, game):
+        if game.opponent.vitalities[self.target_slot] <= 0:
+            print 'already dead'
+            self.cur_strategy = NoneStrategy()
+        elif game.proponent.vitalities[self.battery_slot] < 60000:
+            print 'boosting battery'
+            self.cur_strategy = BoostBattery(battery_slot = self.battery_slot, boost = game.proponent.vitalities[self.battery_slot] - 1)
+        else:
+            print 'attacking'
+            self.cur_strategy = AttackSlot(battery_slot = self.battery_slot, target_slot = self.target_slot, dmg = game.proponent.vitalities[self.battery_slot] * 4 / 5)
+            
 
