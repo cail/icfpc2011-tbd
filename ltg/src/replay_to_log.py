@@ -23,6 +23,7 @@ if __name__ == '__main__':
     print>>log, 'Lambda: The Gathering log emulator'
     
     game = Game(silent=False)
+    original_stdout = sys.stdout
     sys.stdout = log # because game outputs to stdout
     # it's dirty, but i don't care
     
@@ -68,4 +69,4 @@ if __name__ == '__main__':
 
 
     log.close()
-    
+    sys.stdout = original_stdout
