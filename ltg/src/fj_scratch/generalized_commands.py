@@ -44,13 +44,17 @@ def naive_generate_get_i_get_j_sequence(i, j):
                      ['K l', 'S l', 'succ r'] *j + 
                      ['zero r']))
     
-    
+   
+def canonical_sequence(seq):
+    if len(seq) == 0 or seq[0][1] == 'l':
+        seq = [(cards.I, 'r')]+seq
+    assert seq[0][1] == 'r'
+    return seq
+ 
 def apply_sequences(left, right):
     'return sequence equivalent to result of application left to right'
-    if len(right) == 0 or right[0][1] == 'l':
-        right = [(cards.I, 'r')]+right
-    assert right[0][1] == 'r'
     
+    right = canonical_sequence(right)
     t = [(right[0][0], 'r')]
     for atom, side in right[1:]:
         if side == 'l': # fj's method
