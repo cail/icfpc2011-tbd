@@ -29,12 +29,16 @@ class Error(Exception):
 class Context(object):
     def __init__(self, game, zombie=False):
         self.app_limit = MAX_APPLICATIONS
+        self.side_effects = 0
         self.game = game
         self.zombie = zombie
     def count_apply(self):
         self.app_limit -= 1
         if self.app_limit < 0:
             raise Error('application limit exceeded')
+    def count_side_effect(self):
+        # including read side effects
+        self.side_effects += 1
 
 def apply(f, arg, context):
     # i'm deliberately making context required parameter,
@@ -141,9 +145,17 @@ class Double(Function):
         return IntValue(min(arg*2, 65535))
     
 
+def ensure_slot_number(value):
+    if isinstance(value, Function):
+        raise Error('Using function as slot number')
+    if not 0 <= value < SLOTS:
+        raise Error('Slot number not in range')
+    
+    
 class Get(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
+        context.count_side_effect()
         if context.game.proponent.vitalities[arg] <= 0:
             raise Error('Get applied to a dead slot number')
         return context.game.proponent.values[arg]
@@ -153,10 +165,12 @@ class Put(Function):
     def apply(self, arg, context):
         return cards.I
 
+
 def increase_vitality(player, slot, amount=1):
     vitality = player.vitalities[slot]
     if vitality > 0:
         player.vitalities[slot] = min(65535, vitality + amount)
+
 
 def decrease_vitality(player, slot, amount=1):
     vitality = player.vitalities[slot]
@@ -177,12 +191,6 @@ class Attack1(Attack):
     def __str__(self):
         return self.partial_str(self.i)
 
-
-def ensure_slot_number(value):
-    if isinstance(value, Function):
-        raise Error('Using function as slot number')
-    if not 0 <= value < SLOTS:
-        raise Error('Slot number not in range')
     
 class Attack2(Attack):
     def __init__(self, i, j):
@@ -196,6 +204,7 @@ class Attack2(Attack):
         ensure_slot_number(self.i)
         if isinstance(arg, Function):
             raise Error('attack strength is a function')
+        context.count_side_effect()
         if arg > prop.vitalities[self.i]:
             raise Error('too strong attack')
         prop.vitalities[self.i] -= arg
@@ -212,9 +221,11 @@ class Attack2(Attack):
     def __str__(self):
         return self.partial_str(self.i, self.j)
 
+
 class Inc(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
+        context.count_side_effect()
         prop = context.game.proponent
         if context.zombie:
             decrease_vitality(prop, arg)
@@ -222,9 +233,11 @@ class Inc(Function):
             increase_vitality(prop, arg)
         return cards.I        
 
+
 class Dec(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
+        context.count_side_effect()
         opp = context.game.opponent
         if context.zombie: 
             increase_vitality(opp, MAX_SLOT - arg)
@@ -232,9 +245,11 @@ class Dec(Function):
             decrease_vitality(opp, MAX_SLOT - arg)
         return cards.I        
 
+
 class Help(Function):
     def apply(self, arg, context):
         return Help1(arg)    
+
 
 class Help1(Function):
     def __init__(self, i):
@@ -244,18 +259,19 @@ class Help1(Function):
     def __str__(self):
         return self.partial_str(self.i)
 
+
 class Help2(Function):
     def __init__(self, i, j):
         self.i = i
         self.j = j
 
     def apply(self, arg, context):
-        
         prop = context.game.proponent
         
         ensure_slot_number(self.i)
         if isinstance(arg, Function):
             raise Error('help strength is a function')
+        context.count_side_effect()
         if arg > prop.vitalities[self.i]:
             raise Error('too strong help')
         prop.vitalities[self.i] -= arg
@@ -272,27 +288,34 @@ class Help2(Function):
     def __str__(self):
         return self.partial_str(self.i, self.j)
 
+
 class Copy(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
+        context.count_side_effect()
         return context.game.opponent.values[arg]
+
 
 class Revive(Function):
     def apply(self, arg, context):
         ensure_slot_number(arg)
+        context.count_side_effect()
         if context.game.proponent.vitalities[arg] <= 0:
             context.game.proponent.vitalities = 1
         return cards.I
+    
 
 class Zombie(Function):
     def apply(self, arg, context):
         return Zombie1(arg)    
+
 
 class Zombie1(Function):
     def __init__(self, i):
         self.i = i
     def apply(self, arg, context):
         ensure_slot_number(self.i)
+        context.count_side_effect()
         opp = context.game.opponent
         if opp.vitalities[MAX_SLOT-self.i] > 0:
             raise Error('can\'t zombify a living slot')
@@ -301,6 +324,7 @@ class Zombie1(Function):
         return cards.I
     def __str__(self):
         return self.partial_str(self.i, self.j)
+
 
 class cards(object):
     I = Identity()
@@ -319,7 +343,9 @@ class cards(object):
     revive = Revive()
     zombie = Zombie()
 
+
 card_by_name = dict((k, v) for k, v in cards.__dict__.iteritems() if not k.startswith('_'))
+
 
 def _init_canonical_names():
     for name, card in card_by_name.iteritems():
