@@ -51,6 +51,7 @@ def canonical_sequence(seq):
     assert seq[0][1] == 'r'
     return seq
  
+ 
 def apply_sequences(left, right):
     'return sequence equivalent to result of application left to right'
     
@@ -59,7 +60,7 @@ def apply_sequences(left, right):
     for atom, side in right[1:]:
         if side == 'l': # fj's method
             t = [(cards.K, 'l'), (cards.S, 'l'), (atom, 'r')] + t
-        else:
+        else: # fj's method, modified
             t = [(cards.K, 'l'), (cards.S, 'l')] + t + [(atom, 'r')]
     return left+t
 
@@ -69,9 +70,9 @@ def generate_number_sequence(n):
     while n > 0:
         if n %2 == 1:
             t = [(cards.succ, 'l')] + t
+        n /= 2
         if n == 0:
             break
-        n /= 2
         t = [(cards.dbl, 'l')] + t
     t = [(cards.zero, 'r')] + t
     return t
@@ -89,6 +90,7 @@ def generate_get_i_get_j_sequence(i, j):
 seq = generate_get_i_get_j_sequence(7, 3)
 
 
+print len(seq), 'moves'
 print sequence_to_str(seq)
 print eval_sequence(seq)
 
