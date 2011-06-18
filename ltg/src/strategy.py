@@ -36,6 +36,20 @@ class Strategy(object):
         raise NotImplementedError()
 
 
+class IdleStrategy(Strategy):
+    def minimum_slots(self):
+        return 0
+
+    def available_moves(self):
+        return 100500
+
+    def current_priority(self):
+        return 0
+    
+    def pop_move(self):
+        return LEFT_APP, 0, cards.I
+
+
 class GenerateValueStrategy(Strategy):
     def __init__(self, slot = 0, target = 0):
         self.target = target
@@ -192,4 +206,6 @@ class SimpleAttackStrategy(SequenceStrategy):
         self.j_slot = slot
         self.n_slot = slot
         self.strategies = [
+                           AppNTo0(), #
                           ]
+
