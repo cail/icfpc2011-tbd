@@ -1,6 +1,7 @@
 import sys
 import argparse
 
+import rules
 from rules import LEFT_APP, RIGHT_APP, card_by_name
 from game import Game
 from simple_bot import IdleBot, RandomBot, InteractiveBot
@@ -40,6 +41,7 @@ def main(*argv):
     
     parser.add_argument('--replay', type=argparse.FileType('w'),
                         default=None)
+    parser.add_argument('--maxturns', type=int, default=rules.MAX_TURNS)
     parser.add_argument('bot1')
     parser.add_argument('bot2')
     parser.add_argument('number', nargs='?', type=int, default=None, 
@@ -60,6 +62,8 @@ def main(*argv):
     while not game.is_finished():
         if game.half_moves % 1000 == 0:
             print>>sys.stderr, 'half turn', game.half_moves
+        if game.half_moves >= args.maxturns:
+            break
         if game.has_zombie_phase():
             game.zombie_phase()
         bot = bots[game.half_moves%2]
