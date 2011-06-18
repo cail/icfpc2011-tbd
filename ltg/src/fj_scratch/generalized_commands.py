@@ -47,9 +47,9 @@ def naive_generate_get_i_get_j_sequence(i, j):
     
    
 def canonical_sequence(seq):
-    if len(seq) == 0 or seq[0][1] == 'l':
-        seq = [(cards.I, 'r')]+seq
-    assert seq[0][1] == 'r'
+#    if len(seq) == 0 or seq[0][1] == 'l':
+#        seq = [(cards.I, 'r')]+seq
+#    assert seq[0][1] == 'r'
     return seq
  
  
@@ -87,7 +87,7 @@ def generate_get_i_get_j_sequence(i, j):
                            generate_get_n_sequence(j))    
 
 
-def generate_number_applicative(n):
+def generate_number(n):
     t = []
     while n > 0:
         if n %2 == 1:
@@ -96,15 +96,19 @@ def generate_number_applicative(n):
         if n == 0:
             break
         t.append(cards.dbl)
-    t.append(cards.zero)
-    t.reverse()
-    return t
+    res = cards.zero
+    for x in reversed(t):
+        res = (x, res)
+    return res
 
+pprint(generate_number(10))
+pprint(((cards.get, generate_number(2)), ((cards.get, generate_number(3)))))
     
-seq = apply_sequences(generate_get_i_get_j_sequence(2, 3), generate_get_i_get_j_sequence(4, 1))
-
-print sequence_to_str(seq)
-print eval_sequence(seq)
+# seq = apply_sequences(generate_get_i_get_j_sequence(2, 3), generate_get_i_get_j_sequence(4, 1))
+#seq = apply_sequences([(cards.get, 'l')], [(cards.get, 'l')])
+#
+#print sequence_to_str(seq)
+#print eval_sequence(seq)
 #print eval_sequence(seq)
 
 #pprint(dict(function_cache))

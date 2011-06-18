@@ -97,6 +97,8 @@ class Function(object):
         return self.canonical_name
     def partial_str(self, *args):
         return self.canonical_name + ''.join('({0})'.format(arg) for arg in args)
+    def __repr__(self):
+        return str(self)
     # Note! Functions lack structural hash and comparisons,
     # because it's convenient for memoization.
     # Reference inequality does not guarantee structural inequality.

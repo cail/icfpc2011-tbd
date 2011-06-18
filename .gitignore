@@ -2,3 +2,5 @@
 *.pyc
 *.rpl
 /ltg/src/replay.txt
+*.log
+*.exe
