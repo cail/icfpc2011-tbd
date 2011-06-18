@@ -22,7 +22,7 @@ if __name__ == '__main__':
     
     
     #log = sys.stdout
-    
+    print>>html, '<html><body><div style="background-color:#FFFFFF">'
     print>>html, 'Lambda: The Gathering log emulator'
     
     game = Game()
@@ -50,6 +50,7 @@ if __name__ == '__main__':
             player = game.half_moves%2
             if player == 0:
                 print>>html, '<h4>###### turn {0}</h4>'.format(game.half_moves//2+1)
+            print>>html, '<div style="background-color:{0}">'.format('#FFFFE0' if player else '#E0FFFF') 
             print>>html, "<h5>*** player {0}'s move</h5>".format(player)
             print>>html, '<table border="1"><tr>'
             for p in game.players:
@@ -74,13 +75,15 @@ if __name__ == '__main__':
         
         if show:
             if move[0] == LEFT_APP:
-                print>>html, 'player {0} applied card {2} to slot {1}'.\
-                    format(player, move[1], move[2])
+                print>>html, ('player {0} applied card {2} to slot {1}'.
+                    format(player, move[1], move[2]))
             else:
-                print>>html, 'player {0} applied slot {1} to card {2}'.\
-                    format(player, move[1], move[2])
+                print>>html, ('player {0} applied slot {1} to card {2}'.
+                    format(player, move[1], move[2]))
+            print>>html, '</div>'
         game.make_half_move(*move)
 
     print>>html, '<h1>{0}:{1}</h1>'.format(game.players[0].num_alive_slots(), game.players[1].num_alive_slots())
+    print>>html, '</div></body></html>'
     html.close()
     
