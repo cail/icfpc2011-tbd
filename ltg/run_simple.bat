@@ -1,1 +1,1 @@
-@python src/play.py RandomBot RandomBot %1
+@python src/play.py --maxturns 10 RandomBot RandomBot %1
