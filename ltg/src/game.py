@@ -1,5 +1,7 @@
+
 from rules import INITIAL_VITALITY, SLOTS, MAX_TURNS, LEFT_APP, RIGHT_APP
 from rules import apply, cards, Context, Error
+from bot_io import ThunkIo
 
 __all__ = [
     'Game',
@@ -19,8 +21,11 @@ class Player(object):
 
     
 class Game(object):
-    def __init__(self, game_io):
-        self.io = game_io
+    def __init__(self, game_io = None):
+        if game_io == None:
+            self.io = ThunkIo()
+        else:
+            self.io = game_io
         self.players = [Player(), Player()]
         self.proponent, self.opponent = self.players
         self.half_moves = 0
