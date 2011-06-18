@@ -78,7 +78,6 @@ def generate_number_sequence(n):
     t = [(cards.zero, 'r')] + t
     return t
 
-
 def generate_get_n_sequence(n):
     return generate_number_sequence(n)+[(cards.get, 'l')]    
     
@@ -87,8 +86,11 @@ def generate_get_i_get_j_sequence(i, j):
     return apply_sequences(generate_get_n_sequence(i),
                            generate_get_n_sequence(j))    
 
+def generate_number_applicative(n):
+
+
     
-seq = generate_get_i_get_j_sequence(2, 3)
+seq = apply_sequences(generate_get_i_get_j_sequence(2, 3), generate_get_i_get_j_sequence(4, 1))
 
 print sequence_to_str(seq)
 print eval_sequence(seq)

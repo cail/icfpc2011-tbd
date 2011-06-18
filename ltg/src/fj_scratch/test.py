@@ -1,3 +1,4 @@
 import play
-# play.main()
-play.main('bot1', 'bot2', '3')
+play.main('-h')
+
+# play.main('bot1', 'bot2', '3')
