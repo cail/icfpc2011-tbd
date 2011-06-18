@@ -9,6 +9,7 @@ __all__ = [
           'DefaultInteractiveIo',
           'WriteReplayIo',
           'ReadReplayIo',
+          'CompetitionIo',
           'InvalidMoveInputException',
           ]
 
@@ -227,6 +228,24 @@ class ReadReplayIo(QuietInteractiveIo):
             self.tokens.reverse()
         return self.tokens.pop()
 
+
+class CompetitionIo(QuietInteractiveIo):
+    def notify_prop_move(self, bot, prop_move):
+        direction, slot, card = prop_move
+        if direction == LEFT_APP:
+            print '1'
+            if card == 0:
+                print 'zero'
+            else:
+                print str(card)
+            print slot
+        else:
+            print '2'
+            print slot
+            if card == 0:
+                print 'zero'
+            else:
+                print str(card)
 
 class CompositeIo(BotIo):
     def __init__(self, *args):
