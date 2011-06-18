@@ -42,6 +42,9 @@ class BotIo(object):
     def read_move(self):
         raise NotImplementedError()
 
+    def diag(self, string):
+        raise NotImplementedError()
+
 
 class ThunkIo(BotIo):
     def notify_winner(self, player_no):
@@ -66,6 +69,9 @@ class ThunkIo(BotIo):
         pass
 
     def notify_opp_move(self, bot, opp_move):
+        pass
+
+    def diag(self, string):
         pass
 
 
@@ -193,6 +199,9 @@ class DefaultInteractiveIo(QuietInteractiveIo):
 
     def prompt_card_name(self):
         print 'card name?'
+
+    def diag(self, string):
+        print string
 
 
 class WriteReplayIo(ThunkIo):

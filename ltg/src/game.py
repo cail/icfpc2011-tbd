@@ -19,8 +19,8 @@ class Player(object):
 
     
 class Game(object):
-    def __init__(self, silent=True):
-        self.silent = silent
+    def __init__(self, game_io):
+        self.io = game_io
         self.players = [Player(), Player()]
         self.proponent, self.opponent = self.players
         self.half_moves = 0
@@ -38,23 +38,19 @@ class Game(object):
             
     def zombie_phase(self):
         prop = self.proponent
-        if not self.silent:
-            print 'zombie phase'
+        self.io.diag('zombie phase')
         for i in range(SLOTS):
             if prop.vitalities[i] == -1:
-                if not self.silent:
-                    print 'zombie in slot', i, 'is applied to I'
+                self.io.diag('zombie in slot' + str(i) + 'is applied to I')
                 z = prop.values[i]
                 context = Context(self, zombie=True)
                 try:
                     _ = apply(z, cards.I, context) # not interested in result
                 except Error as e:
-                    if not self.silent:
-                        print e
+                    self.io.diag(str(e))
                 prop.values[i] = cards.I
                 prop.vitalities[i] = 0
-                if not self.silent:
-                    print 'zombie is rested'
+                self.io.diag('zombie is rested')
             
     def make_half_move(self, direction, slot, card):
         import warnings
@@ -81,8 +77,7 @@ class Game(object):
                 assert False
             self.proponent.values[slot] = result
         except Error as e:
-            if not self.silent:
-                print 'Error:' + str(e)
+            self.io.diag('Error:' + str(e))
             self.proponent.values[slot] = cards.I
             
         
