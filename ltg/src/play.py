@@ -77,6 +77,7 @@ def main(*argv):
             else:
                 d = 2
             print>>replay, d, move[1], move[2]
+            replay.flush()
         
     if replay is not None:
         replay.close()

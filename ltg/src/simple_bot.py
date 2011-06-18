@@ -11,6 +11,7 @@ __all__ = [
     'IdleBot',
     'RandomBot'
     'InteractiveBot',
+    'PlaybackBot',
 ]
 
 
@@ -81,7 +82,24 @@ class InteractiveBot(object):
             
         return (direction, slot, card)
     
-    
+
+class PlaybackBot(object):
+    def __init__(self, moves, game):
+        self.moves = iter(moves)
+        self.game = game
+    def choose_move(self):
+        dir, slot, card = next(self.moves).split()
+        if dir == '1':
+            dir = 'l'
+        elif dir == '2':
+            dir = 'r'
+        else:
+            assert False
+        slot = int(slot)
+        card = card_by_name[card]
+        return dir, slot, card
+         
+   
 class OfficialConnectorBot111():
     # it's not used because it's shit
     def __init__(self, game):
