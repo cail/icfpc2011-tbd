@@ -48,6 +48,38 @@ def binarize_term(term):
         return result
     return term
 
+
+def subterms(term):
+    'in postorder'
+    result = []
+    visited = set()
+    def rec(term):
+        if isinstance(term, App):
+            left, right = term
+            rec(left)
+            rec(right)
+        if term not in visited:
+            visited.add(term)
+            result.append(term)
+    rec(term)
+    return result
+ 
+
+def estimate_costs(term):
+    st = subterms(term)
+    cost = {}
+    for t in st:
+        if isinstance(t, App):
+            left, right = t
+            if cost[left] == 1:
+                cost[t] = cost[right]+1
+            else:
+                cost[t] = cost[left]+3*(cost[right]-1)+1
+        else:
+            cost[t] = 1
+    return cost[term]
+
+
 def check_term(term):
     if isinstance(term, App):
         left, right = term
@@ -114,7 +146,8 @@ def parse_lambda(s, locals={}):
 
 
 if __name__ == '__main__':
-    t = ((cards.get, number_term(4)), (cards.get, number_term(5))) 
+    t = ((cards.get, number_term(4)), (cards.get, number_term(5)))
+
     #print term_to_str(t)
     pprint(t)
     
