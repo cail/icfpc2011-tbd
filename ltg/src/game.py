@@ -92,7 +92,7 @@ class Game(object):
             if self.output_level == 1:
                 print 'Exception: Native.Error'
             if self.output_level == 2:
-                print str(e)
+                print 'error:', str(e)
             if self.output_level > 0:
                 print 'slot {0} reset to I'.format(slot)
             self.proponent.values[slot] = cards.I
