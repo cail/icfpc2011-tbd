@@ -54,12 +54,20 @@ def apply(f, arg, context):
 # Hopefully it wouldn't lead to scary bugs.
 
 class Function(object):
+    @classmethod
+    def create(cls, *args):
+        return cls(*args)
     def apply(self, arg, context):
         raise NotImplementedError()
     def __str__(self):
         return self.canonical_name
     def partial_str(self, *args):
         return self.canonical_name + ''.join('({0})'.format(arg) for arg in args)
+    # Note! Functions lack structural hash and comparisons,
+    # because it's convenient for memoization.
+    # Reference inequality does not guarantee structural inequality.
+    # So far we do not need structural comparison at all.
+    # As a quick hack one can compare str()'s.
 
 
 # this class is here because all functions are
@@ -76,13 +84,13 @@ class AbstractFunction(Function):
         return self.name
     
 
-class IntValue(int): # not a Function -- otherwise it would break a lot of code below
+class IntValue(int): # not a Function -- because it's not!
+    # we are not memoizing ints, so no need for create function
     def __init__(self, value):
-        self.value = value
+        int.__init__(self, value)
     def apply(self, arg, context):
         raise Error('Attempt to apply an integer')
-    def __str__(self):
-        return str(self.value)
+    # hash and comparison are taken from int, so it's ok
 
 
 class Identity(Function):
@@ -107,14 +115,14 @@ class K1(K):
     
 class S(Function):
     def apply(self, arg, context):
-        return S1(arg)
+        return S1.create(arg)
 
 
 class S1(S):
     def __init__(self, f):
         self.f = f
     def apply(self, arg, context):
-        return S2(self.f, arg)
+        return S2.create(self.f, arg)
     def __str__(self):
         return self.partial_str(self.f)
     
@@ -180,14 +188,14 @@ def decrease_vitality(player, slot, amount=1):
     
 class Attack(Function):
     def apply(self, arg, context):
-        return Attack1(arg)    
+        return Attack1.create(arg)    
     
     
 class Attack1(Attack):
     def __init__(self, i):
         self.i = i
     def apply(self, arg, context):
-        return Attack2(self.i, arg)
+        return Attack2.create(self.i, arg)
     def __str__(self):
         return self.partial_str(self.i)
 
@@ -248,14 +256,14 @@ class Dec(Function):
 
 class Help(Function):
     def apply(self, arg, context):
-        return Help1(arg)    
+        return Help1.create(arg)    
 
 
 class Help1(Function):
     def __init__(self, i):
         self.i = i
     def apply(self, arg, context):
-        return Help2(self.i, arg)
+        return Help2.create(self.i, arg)
     def __str__(self):
         return self.partial_str(self.i)
 
@@ -307,7 +315,7 @@ class Revive(Function):
 
 class Zombie(Function):
     def apply(self, arg, context):
-        return Zombie1(arg)    
+        return Zombie1.create(arg)    
 
 
 class Zombie1(Function):
@@ -327,21 +335,21 @@ class Zombie1(Function):
 
 
 class cards(object):
-    I = Identity()
+    I = Identity.create()
     zero = IntValue(0)
-    succ = Succ()
-    dbl = Double()
-    get = Get()
-    put = Put()
-    S = S()
-    K = K()
-    inc = Inc()
-    dec = Dec()
-    attack = Attack()
-    help = Help()
-    copy = Copy()
-    revive = Revive()
-    zombie = Zombie()
+    succ = Succ.create()
+    dbl = Double.create()
+    get = Get.create()
+    put = Put.create()
+    S = S.create()
+    K = K.create()
+    inc = Inc.create()
+    dec = Dec.create()
+    attack = Attack.create()
+    help = Help.create()
+    copy = Copy.create()
+    revive = Revive.create()
+    zombie = Zombie.create()
 
 
 card_by_name = dict((k, v) for k, v in cards.__dict__.iteritems() if not k.startswith('_'))
