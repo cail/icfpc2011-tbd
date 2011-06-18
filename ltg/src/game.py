@@ -32,6 +32,9 @@ class Game(object):
         return \
             self.half_moves >= MAX_TURNS*2 or \
             any(not p.has_alive_slots() for p in self.players)
+         
+    def has_zombie_phase(self):
+        return self.proponent.has_zombies()
             
     def zombie_phase(self):
         prop = self.proponent
@@ -55,9 +58,6 @@ class Game(object):
             
     def make_half_move(self, direction, slot, card):
         import warnings
-         
-        if self.proponent.has_zombies():
-            self.zombie_phase()
             
         self.apply(
             slot, 
