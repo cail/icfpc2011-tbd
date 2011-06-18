@@ -24,6 +24,7 @@ class Game(object):
         self.players = [Player(), Player()]
         self.proponent, self.opponent = self.players
         self.half_moves = 0
+        self.move_history = []
 
         #self.proponent.vitalities[13] = -1
         #self.proponent.values[13] = zero
@@ -57,8 +58,7 @@ class Game(object):
                     print 'zombie is rested'
             
     def make_half_move(self, direction, slot, card):
-        import warnings
-            
+        self.move_history.append((direction, slot, card))
         self.apply(
             slot, 
             card, 
