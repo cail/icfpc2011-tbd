@@ -16,11 +16,15 @@ if __name__ == '__main__':
         
     log_name = os.path.splitext(replay_name)[0]+'.log'
     log = open(log_name, 'w')
+    
+    
     #log = sys.stdout
     
     print>>log, 'Lambda: The Gathering log emulator'
     
-    game = Game()
+    game = Game(silent=False)
+    sys.stdout = log # because game outputs to stdout
+    # it's dirty, but i don't care
     
     bots = [PlaybackBot(replay[::2], game), PlaybackBot(replay[1::2], game)]
 
