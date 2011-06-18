@@ -30,7 +30,7 @@ class RandomBot(Bot):
     def choose_move(self):
         return (
             random.choice([LEFT_APP, RIGHT_APP]), 
-            random.randrange(SLOTS),
+            random.randrange(min(SLOTS, 10)),
             random.choice(card_by_name.values()))
 
 
@@ -98,4 +98,5 @@ class PlaybackBot(Bot):
         slot = int(slot)
         card = card_by_name[card]
         return dir, slot, card
+         
          

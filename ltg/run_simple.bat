@@ -1,1 +1,1 @@
-@python src/play.py --maxturns 2000 RandomBot IdleBot %1
+@python src/play.py test_seq_bot() test_seq_bot() %1
