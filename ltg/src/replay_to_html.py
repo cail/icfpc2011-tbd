@@ -5,7 +5,7 @@ from game import Game
 from simple_bot import PlaybackBot
 from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 
-HEAD = 200 # how many head and tail moves we show
+HEAD = 400 # how many head and tail moves we show
 TAIL = 20
 
 if __name__ == '__main__':
@@ -25,8 +25,10 @@ if __name__ == '__main__':
     print>>html, '<html><body><div style="background-color:#FFFFFF">'
     print>>html, 'Lambda: The Gathering log emulator'
     
-    game = Game()
-    
+    game = Game(output_level=2)
+    original_stdout = sys.stdout
+    sys.stdout = html # because game outputs to stdout
+    # it's dirty, but i don't care    
     bots = [PlaybackBot(replay[::2], game), PlaybackBot(replay[1::2], game)]
 
     skip_begin = -1
@@ -86,4 +88,4 @@ if __name__ == '__main__':
     print>>html, '<h1>{0}:{1}</h1>'.format(game.players[0].num_alive_slots(), game.players[1].num_alive_slots())
     print>>html, '</div></body></html>'
     html.close()
-    
+    sys.stdout = original_stdout    
