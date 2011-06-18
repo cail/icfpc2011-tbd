@@ -76,6 +76,7 @@ if __name__ == '__main__':
             else:
                 d = 2
             print>>replay, d, move[1], move[2]
+            replay.flush()
         
     if replay is not None:
         replay.close()

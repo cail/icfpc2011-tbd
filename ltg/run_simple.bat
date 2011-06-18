@@ -1,1 +1,1 @@
-@python src/play.py IdleBot IdleBot %1
+@python src/play.py RandomBot RandomBot %1
