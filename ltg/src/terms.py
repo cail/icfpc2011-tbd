@@ -211,6 +211,19 @@ def parse_lambda(s, locals={}):
     return parse_term(eliminate_abstraction(s), locals)
 
 
+def value_to_term(value):
+    if isinstance(value, IntValue):
+        return int(value)
+    # we depend on the fact that all functions with no arguments are cards themselves
+    if value.arg0 is None:
+        return value
+    card = card_by_name[value.canonical_name] # get corresponding card
+    r = (card, value_to_term(value.arg0))
+    if value.arg1 is not None:
+        r = (r, value_to_term(value.arg1))
+    return r
+
+
 def fold_numbers(term):
     if isinstance(term, App):
         left, right = term
@@ -227,7 +240,7 @@ def fold_numbers(term):
         return int(term)
     return term
     
-    
+
 def unfold_numbers(term):
     if isinstance(term, App):
         left, right = term
@@ -268,3 +281,4 @@ if __name__ == '__main__':
         print "don't worry, evaluation is not fully supported BECAUSE."
 
 
+    

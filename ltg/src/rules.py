@@ -175,6 +175,7 @@ class IntValue(int): # not a Function -- because it's not!
     def __repr__(self):
         return self.canonical_name
 
+
 def function(base = Function):
     '''More clusters of metaparadigms'''
     def wrapper(f):
@@ -185,7 +186,7 @@ def function(base = Function):
                                     '__slots__' : [], 
                                     'apply' : f})
     return wrapper
-                                  
+
 @function()
 def Identity(self, arg, context):
     return arg
