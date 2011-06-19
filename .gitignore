@@ -4,5 +4,6 @@
 *.log
 *.exe
 *.tar
+*.gz
 /ltg/src/replay.txt
 /ltg/our.html

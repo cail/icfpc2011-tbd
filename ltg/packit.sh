@@ -1,2 +1,2 @@
 #!/bin/sh
-git archive -v --format=tar -o submission.tar HEAD src install run
+git archive -v --format=tar HEAD src install run | gzip >submission.tar.gz

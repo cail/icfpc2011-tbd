@@ -1,3 +1,2 @@
 #!/bin/sh
-
-/usr/bin/python src/run.py RandomBot $1
+python src/play.py 'test_seq_bot()' 'test_seq_bot()' $*
