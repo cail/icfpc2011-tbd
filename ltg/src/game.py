@@ -23,10 +23,10 @@ class Player(object):
 class Game(object):
     def __init__(self, game_io = None, output_level=0):
         self.output_level = output_level;
-        if game_io == None:
-            self.io = ThunkIo()
-        else:
-            self.io = game_io
+        #if game_io is None:
+        #    self.io = ThunkIo()
+        #else:
+        #    self.io = game_io
         self.players = [Player(), Player()]
         self.proponent, self.opponent = self.players
         self.half_moves = 0
