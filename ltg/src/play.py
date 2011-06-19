@@ -9,6 +9,7 @@ from idiot_bot import test_idiot_bot
 from sequence_bot import test_seq_bot
 from slot_killer import slot_killer_bot
 from combo_bot import test_combo_bot
+from kick_ass import kick_ass_bot
 
 
 def send_move(direction, slot, card):
