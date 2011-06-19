@@ -231,7 +231,10 @@ def parse_lambda(s, locals={}):
     return parse_term(eliminate_abstraction(s), locals)
 
 def lambda_to_sequence(s, locals={}):
-    return parse_term(eliminate_abstraction(s), locals)
+    t = parse_lambda(s, locals)
+    t = binarize_term(t)
+    t = unfold_numbers(t)
+    return term_to_sequence(t)
 
 def value_to_term(value):
     if isinstance(value, IntValue):
