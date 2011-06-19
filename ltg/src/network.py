@@ -2,10 +2,11 @@ from pprint import pprint
 import sys
 from copy import copy
 from collections import defaultdict
+import random
 
 from terms import number_term, optimal_subterm, replace_leaf_subterm,\
     sequential_cost, subterms, term_to_sequence, is_subterm_eager,\
-    fold_numbers
+    fold_numbers, calc_costs_and_weights, value_to_term, unfold_numbers
 import rules
 from rules import cards
 from game import Game
@@ -18,11 +19,6 @@ RUNNING = '*-RUN '
 # for comparisons like FAIL < OK
 
 
-  
-            
-class Requirement(object):
-    def check(self, game):
-        raise NotImplementedError()
     
             
 class Goal(object):
@@ -31,6 +27,12 @@ class Goal(object):
         self.slot = slot
         self.gets = set()
         self.lazy_gets = set()
+        
+    def clone(self):
+        result = Goal(self.term, self.slot)
+        result.gets = copy(self.gets)
+        result.lazy_gets = copy(self.lazy_gets)
+        return result
     
     def __str__(self):
         result = 'Goal(term={0}, slot={1}) of cost {2}'.\
@@ -79,6 +81,25 @@ class NetworkFail(Exception):
     pass
 
 
+def global_optimize_network(network):
+    best = None
+    best_cost = 1e100
+    orig = str(network)
+    for reg_count in [1]+[3]*5:
+        assert str(network) == orig
+        t = network.clone()
+        t.reg_count = reg_count
+        t.refine()
+        cost = t.cost()
+        if cost < best_cost:
+            best = t
+            best_cost = cost
+        if network.game.total_time_left < 1000 or network.game.turn_time_left < 10:
+            break
+        
+    return best
+
+
 class Network(object):
     def __init__(self, game):
         self.goals = []
@@ -89,6 +110,22 @@ class Network(object):
         
         self.instructions = []
         self.current_goal = None
+        self.next_move = None
+        self.reg_count = 10
+        
+    def clone(self):
+        result = Network(self.game)
+        goal_map = dict((g, g.clone()) for g in self.goals)
+        for g in self.goals:
+            result.add_goal(goal_map[g])
+            
+        result.petrified_slots = copy(self.petrified_slots)
+
+        result.instructions = self.instructions[:]
+        if self.current_goal is not None:
+            result.current_goal = goal_map[self.current_goal]
+        result.next_move = self.next_move    
+        return result
 
     def dont_touch(self, *slots):
         self.petrified_slots |= set(slots)
@@ -119,6 +156,7 @@ class Network(object):
                 raise NetworkFail('slot {0} is dead'.format(slot))
         
     def refine(self):
+        self.reuse_shit()
         self.allocate_registers()
         
     def add_goal(self, goal):
@@ -137,6 +175,36 @@ class Network(object):
         result += 'petrified slots: {0}\n'.format(self.petrified_slots)
         result += '({0} steps to construct)'.format(self.cost())
         return result
+    
+    
+    def introduce_get(self, sub_term, register_access):
+        for goal in self.goals:
+            if not sub_term in subterms(goal.term):
+                continue
+            goal.introduce_get(sub_term, register_access)
+            
+                
+    def reuse_shit(self):
+        assert self.current_goal is None
+        
+        prop = self.game.proponent
+        terms = [goal.term for goal in self.goals]
+        costs, _ = calc_costs_and_weights(*terms)
+        for slot in slot_numbers_by_reachability:
+            if prop.vitalities[slot] <= 0:
+                continue
+            value = prop.values[slot]
+            if value == cards.I:
+                continue # for speed
+            shit = value_to_term(value)
+            shit = unfold_numbers(shit)
+            if shit in costs:
+                access = (cards.get, number_term(slot))
+                if sequential_cost(access) < costs[shit]:
+                    if self.is_slot_available(slot):
+                        self.introduce_get(shit, access)
+                del costs[shit]
+        
                 
     def allocate_register(self, register_slot):
         if not self.is_slot_available(register_slot):
@@ -144,9 +212,8 @@ class Network(object):
         prop = self.game.proponent
         register_clean = str(prop.values[register_slot]) == 'I'
         
-        terms = []
-        for goal in self.goals:
-            terms.append(goal.term)
+        terms = [goal.term for goal in self.goals]
+        
         register_access = (cards.get, number_term(register_slot))
         register_cost = sequential_cost(register_access)
         sub_term, advantage = optimal_subterm(register_cost, *terms)
@@ -159,25 +226,23 @@ class Network(object):
             return False
         
         sub_goal = Goal(sub_term, register_slot)
-        for goal in self.goals:
-            if not sub_term in subterms(goal.term):
-                continue
-            goal.introduce_get(sub_term, register_access)
+        
+        self.introduce_get(sub_term, register_access)
 
         self.add_goal(sub_goal)
         
         return True
     
     def allocate_registers(self, regs=None):
-        #if regs is None:
-        #    regs = slot_numbers_by_reachability[:5][::-1]
+
         regs = []
         for reg in slot_numbers_by_reachability:
             if self.is_slot_available(reg):
                 regs.append(reg)
-                if len(regs) > 2:
+                if len(regs) >= self.reg_count:
                     break
         regs.reverse()
+        random.shuffle(regs)
         for slot in regs:
             self.allocate_register(slot)
         
@@ -191,7 +256,11 @@ class Network(object):
             return False
         if slot_number in self.petrified_slots:
             return False
-        return len(self.slot_goals[slot_number]) == 0
+        if len(self.slot_goals[slot_number]) > 0:
+            return False
+        if any(slot_number in goal.gets for goal in self.goals):
+            return False
+        return True
     
     def goal_status(self, goal):
         if goal == self.current_goal:

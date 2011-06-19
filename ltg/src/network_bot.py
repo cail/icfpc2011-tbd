@@ -9,7 +9,7 @@ from simple_bot import Bot
 from terms import number_term, term_to_sequence, binarize_term, parse_lambda,\
     unfold_numbers
 
-from network import Network, Goal, NetworkFail
+from network import Network, Goal, NetworkFail, global_optimize_network
 
 NO_PLAN = 'NO PLAN'
 
@@ -41,7 +41,8 @@ class NetworkBot(Bot):
                     return ('l', 0, cards.I)                
                 if self.debug:
                     print>>sys.stderr, 'NEW PLAN:', self.net
-                self.net.refine()
+                #self.net.refine()
+                self.net = global_optimize_network(self.net)
                 self.net.begin()
                 if self.debug:
                     print>>sys.stderr, 'DETAILED PLAN:', self.net
