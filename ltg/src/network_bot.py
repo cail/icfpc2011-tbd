@@ -85,7 +85,7 @@ def lambdas_to_plan(game, d):
             
 class SampleNetworkBot(NetworkBot):
     def __init__(self, debug=False):
-        self.plans_limit = 2
+        self.plans_limit = 1000
         NetworkBot.__init__(self, debug)
         
     
@@ -93,7 +93,7 @@ class SampleNetworkBot(NetworkBot):
         damage = 8192
         attacker1 = randrange(SLOTS)
         attacker2 = randrange(SLOTS)
-        target = 255
+        target = SLOTS-1
         
         plan = lambdas_to_plan(self.game, {
             42: r'(attack {0} {1} {2})'.format(attacker1, 255-target, damage),
@@ -120,12 +120,17 @@ class SampleNetworkBot(NetworkBot):
         return plan, plan_checker
     
     def zombie_plan(self):
-        donor = 1
-        acceptor = 0
-        target = 255
+        vits = self.game.opponent.vitalities
+        alive = [slot for slot in range(SLOTS) if vits[slot] > 0]
+        
+        donor, acceptor = (alive+[0, 0])[:2]
+        if vits[donor] < vits[acceptor]:
+            donor, acceptor = acceptor, donor
+
+        target = SLOTS-1
         
         help_term = '(help {0} {1})'.format(donor, acceptor)
-        strength = 10000
+        strength = vits[donor]
         lazy_help = '(S (K {0}) (K {1}))'.format(help_term, strength)
          
         plan = lambdas_to_plan(self.game, {
@@ -133,7 +138,7 @@ class SampleNetworkBot(NetworkBot):
         })
         
         def plan_checker():
-            return True
+            return True # TODO:
         return plan, plan_checker
     
     def make_plan(self):
