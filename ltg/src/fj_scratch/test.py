@@ -24,6 +24,6 @@ import replay_to_html
 import shlex
 import webbrowser
 
-#play.main(*shlex.split('--replay battery.rpl the_battery_bot() IdleBot()'))
-#replay_to_html.main('battery.rpl')
-webbrowser.open('battery.html')
+play.main(*shlex.split('--replay tmp.rpl loop_de_loop_bot() IdleBot()'))
+replay_to_html.main('tmp.rpl')
+webbrowser.open('tmp.html')
