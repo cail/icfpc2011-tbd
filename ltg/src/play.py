@@ -71,8 +71,8 @@ def main(*argv):
         bots[1].set_game(game)
 
     while not game.is_finished():
-        if game.half_moves % 10000 == 0:
-            print>>sys.stderr, 'half turn', game.half_moves
+        #if game.half_moves % 10000 == 0:
+            #print>>sys.stderr, 'half turn', game.half_moves
         if game.half_moves >= args.maxturns*2:
             break
         if game.has_zombie_phase():
@@ -103,7 +103,7 @@ def main(*argv):
         
     if replay is not None:
         replay.close()
-    print>>sys.stderr, 'game ended at half turn', game.half_moves    
+    #print>>sys.stderr, 'game ended at half turn', game.half_moves    
     
 if __name__ == '__main__':
     main()
