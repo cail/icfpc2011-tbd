@@ -62,6 +62,7 @@ def main(*argv):
     bot_number = args.number
     
     game = Game()
+    game.start_timer()
     
     bots = [eval(args.bot1), eval(args.bot2)]
     if bot_number in (0, None):
@@ -79,9 +80,15 @@ def main(*argv):
         bot = bots[game.half_moves%2]
         
         if bot_number == 1-game.half_moves%2:
+            game.stop_timer() # playing vs opponent -- pause timer only for IO
             move = receive_move()
+            game.start_timer()
         else:
             move = bot.choose_move()
+            if bot_number is None: 
+                # pitting two bots together -- next bot's time slot starts right here.
+                game.stop_timer()
+                game.start_timer()
         if bot_number == game.half_moves%2:
             send_move(*move)
         game.make_half_move(*move)

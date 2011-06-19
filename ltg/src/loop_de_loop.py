@@ -5,8 +5,8 @@ from rules import cards, SLOTS, MAX_SLOT, LEFT_APP, RIGHT_APP, IntValue
 from sequence_bot import SequenceBot
 from simple_bot import Bot
 from slot_killer import SequenceBotNone
-from terms import scnt, number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda, unfold_numbers
-
+from terms import scnt, number_term, number_term_with_min_seq_cost, lambda_to_sequence
+ 
 
 def loop_de_loop_bot():
     return LoopDeLoop()
@@ -35,10 +35,7 @@ class LambdaSequenceBot(Bot):
         for t in [
             self.lmb,
             ]:
-            t = parse_lambda(t, self.lcl)
-            t = binarize_term(t)
-            t = unfold_numbers(t)
-            sequence += term_to_sequence(t)
+            sequence += lambda_to_sequence(t, self.lcl)
         seq = SequenceBotNone(sequence, self.slot)
         seq.set_game(self.game)
         return seq

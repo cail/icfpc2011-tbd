@@ -8,6 +8,8 @@ __all__ = [
     'MAX_TURNS',
     'LEFT_APP',
     'RIGHT_APP',
+    'TURN_TIME',
+    'TOTAL_TIME',
     'Function',
     'IntValue',
     'card_by_name',
@@ -24,6 +26,8 @@ MAX_SLOT = SLOTS - 1
 INITIAL_VITALITY = 10000
 MAX_APPLICATIONS = 1000
 MAX_TURNS = 100000
+TURN_TIME = 40.0 # err on the side of caution
+TOTAL_TIME = 8000.0 
 
 LEFT_APP = 'l'
 RIGHT_APP = 'r'
