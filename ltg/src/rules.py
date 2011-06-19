@@ -1,4 +1,5 @@
 from collections import defaultdict
+import sys
 
 __all__ = [
     'SLOTS',
@@ -15,6 +16,8 @@ __all__ = [
     'apply',
     'cards',
 ]
+
+sys.setrecursionlimit(8000)
 
 SLOTS = 256
 MAX_SLOT = SLOTS - 1
