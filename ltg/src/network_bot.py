@@ -85,18 +85,16 @@ def lambdas_to_plan(game, d):
             
 class SampleNetworkBot(NetworkBot):
     def __init__(self, debug=False):
-        self.plans_limit = 10
+        self.plans_limit = 2
         NetworkBot.__init__(self, debug)
         
-    def make_plan(self):
-        self.plans_limit -= 1
-        if self.plans_limit < 0:
-            return NO_PLAN, None
-        
+    
+    def kill_plan(self):
         damage = 8192
         attacker1 = randrange(SLOTS)
         attacker2 = randrange(SLOTS)
-        target = randrange(SLOTS)
+        target = 255
+        
         plan = lambdas_to_plan(self.game, {
             42: r'(attack {0} {1} {2})'.format(attacker1, 255-target, damage),
             43: r'(attack {0} {1} {2})'.format(attacker2, 255-target, damage),
@@ -106,15 +104,48 @@ class SampleNetworkBot(NetworkBot):
             prop = self.game.proponent
             opp = self.game.opponent
 
+            if opp.vitalities[target] <= 0:
+                return False # no need to kill
+
             d = 0
             if prop.vitalities[attacker1] >= damage:
                 d += damage*9//10
             if prop.vitalities[attacker2] >= damage:
                 d += damage*9//10
             if opp.vitalities[target] > d:
-                return False
+                return False # can't kill anyway
 
             return True
+
+        return plan, plan_checker
+    
+    def zombie_plan(self):
+        donor = 1
+        acceptor = 0
+        target = 255
+        
+        help_term = '(help {0} {1})'.format(donor, acceptor)
+        strength = 10000
+        lazy_help = '(S (K {0}) (K {1}))'.format(help_term, strength)
+         
+        plan = lambdas_to_plan(self.game, {
+            13: '(zombie {0} {1})'.format(255-target, lazy_help),
+        })
+        
+        def plan_checker():
+            return True
+        return plan, plan_checker
+    
+    def make_plan(self):
+        self.plans_limit -= 1
+        if self.plans_limit < 0:
+            return NO_PLAN, None
+        
+        opp = self.game.opponent
+        if opp.vitalities[255] > 0:
+            return self.kill_plan()
+        else:
+            return self.zombie_plan()
         
         #assert plan_checker()
         return plan, plan_checker
