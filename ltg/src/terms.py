@@ -171,7 +171,7 @@ def parse_term(s, locals={}):
     s = s.replace(' ', ', ')
     for card_name in card_by_name:
         s = s.replace(card_name, 'cards.'+card_name)
-    return eval(s, globals(), locals)
+    return binarize_term(eval(s, globals(), locals))
 
 
 def parse_lambda(s, locals={}):

@@ -48,20 +48,28 @@ class Game(object):
         if self.io:
             self.io.diag('zombie phase')
         for i in range(SLOTS):
-            if prop.vitalities[i] == -1:
-                if self.io:
-                    self.io.diag('zombie in slot' + str(i) + 'is applied to I')
-                z = prop.values[i]
-                context = Context(self, zombie=True)
-                try:
-                    _ = apply(z, cards.I, context) # not interested in result
-                except Error as e:
-                    if self.io: 
-                        self.io.diag(str(e))
-                prop.values[i] = cards.I
-                prop.vitalities[i] = 0
-                if self.io:
-                    self.io.diag('zombie is rested')
+            if prop.vitalities[i] != -1:
+                continue
+            if self.output_level > 0:
+                print 'applying zombie slot {0}={{-1,{1}}} to I'.\
+                    format(i, prop.values[i])
+            if self.io:
+                self.io.diag('zombie in slot' + str(i) + 'is applied to I')
+            z = prop.values[i]
+            context = Context(self, zombie=True)
+            try:
+                _ = apply(z, cards.I, context) # not interested in result
+            except Error as e:
+                if self.io: 
+                    self.io.diag(str(e))
+                if self.output_level == 1:
+                    print 'Exception: Native.Error'
+                if self.output_level == 2:
+                    print 'error:', str(e)
+            prop.values[i] = cards.I
+            prop.vitalities[i] = 0
+            if self.io:
+                self.io.diag('zombie is rested')
             
     def make_half_move(self, direction, slot, card):
         self.move_history.append((direction, slot, card))

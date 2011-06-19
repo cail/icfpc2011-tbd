@@ -5,7 +5,7 @@ from game import Game
 from simple_bot import PlaybackBot
 from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 
-HEAD = 400 # how many head and tail moves we show
+HEAD = 1100 # how many head and tail moves we show
 TAIL = 20
 
 if __name__ == '__main__':
@@ -44,6 +44,8 @@ if __name__ == '__main__':
         
         show = game.half_moves < HEAD or game.half_moves >= len(replay)-TAIL
         
+        game.output_level = 2 if show else 0
+        
         if game.half_moves == HEAD and game.half_moves < len(replay)-TAIL:
             print>>html, '<h1>...</h1>'*3
         
@@ -60,17 +62,23 @@ if __name__ == '__main__':
                 print>>html, 'Slots: <table>'
                 for i in range(SLOTS):
                     vit, value = p.vitalities[i], p.values[i]
+                    try:
+                        value = str(value)
+                    except RuntimeError as e:
+                        value = str(e)
                     color = '#B0FFB0'
                     if vit == 0:
                         color = '#FFB0B0'
                     if vit == -1:
                         color = '#00A060'
-                    if (vit, value) != (INITIAL_VITALITY, cards.I):
+                    if (vit, value) != (INITIAL_VITALITY, 'I'):
                         print>>html, '<tr style="background-color:{3}"><td>{0}</td><td>{1}</td><td>{2}</td>'.format(i, vit, value, color)
                 print>>html, '</table>'
                 print>>html, '</td>'
             print>>html, '</tr></table>'
-        
+
+            print>>html, '<pre>'
+            
         if game.has_zombie_phase():
             game.zombie_phase()
         move = bots[game.half_moves%2].choose_move()
@@ -84,6 +92,8 @@ if __name__ == '__main__':
                     format(player, move[1], move[2]))
             print>>html, '</div>'
         game.make_half_move(*move)
+        if show:
+            print>>html, '</pre>'
 
     print>>html, '<h1>{0}:{1}</h1>'.format(game.players[0].num_alive_slots(), game.players[1].num_alive_slots())
     print>>html, '</div></body></html>'
