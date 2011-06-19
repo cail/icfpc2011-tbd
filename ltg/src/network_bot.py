@@ -7,7 +7,7 @@ from rules import cards, card_by_name, INITIAL_VITALITY, SLOTS
 from simple_bot import Bot
 
 from terms import number_term, term_to_sequence, binarize_term, parse_lambda,\
-    unfold_numbers
+    unfold_numbers, sequential_cost
 
 from network import Network, Goal, NetworkFail, global_optimize_network
 
@@ -133,17 +133,24 @@ class SampleNetworkBot(NetworkBot):
         alive = [slot for slot in range(SLOTS) if vits[slot] > 0]
         
         donor, acceptor = (alive+[0, 0])[:2]
-        if vits[donor] < vits[acceptor]:
+        if vits[donor] <= vits[acceptor]:
             donor, acceptor = acceptor, donor
 
         target = SLOTS-1
         
+        def range_term(m, n):
+            return min(range(m, n), key=lambda i: sequential_cost(number_term(i)))
+        
         help_term = '(help {0} {1})'.format(donor, acceptor)
         strength = vits[donor]
+        #strength = range_term((vits[acceptor]*10+10)//11, vits[donor]+1)
+        assert strength <= vits[donor]
+        assert strength*11//10 >= vits[acceptor] 
         lazy_help = '(S (K {0}) (K {1}))'.format(help_term, strength)
          
+        slot = randrange(SLOTS)
         plan = lambdas_to_plan(self.game, {
-            13: '(zombie {0} {1})'.format(255-target, lazy_help),
+            slot: '(zombie {0} {1})'.format(255-target, lazy_help),
         })
         
         def plan_checker():
