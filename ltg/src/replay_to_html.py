@@ -8,12 +8,7 @@ from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 HEAD = 3300 # how many head and tail moves we show
 TAIL = 20
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print 'usage: replay_to_html hz.rpl'
-        exit(1)
-        
-    replay_name = sys.argv[1]     
+def main(replay_name):
     with open(replay_name) as fin:
         replay = list(fin)
         
@@ -99,3 +94,9 @@ if __name__ == '__main__':
     print>>html, '</div></body></html>'
     html.close()
     sys.stdout = original_stdout    
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print 'usage: replay_to_html hz.rpl'
+        exit(1)
+    main(sys.argv[1])     

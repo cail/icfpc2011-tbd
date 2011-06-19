@@ -9,12 +9,21 @@
 #res = eval_sequence(seq, debug = True)
 #pprint(res)
 
-from terms import parse_lambda, binarize_term, term_to_sequence
+#from terms import parse_lambda, binarize_term, term_to_sequence
+#
+#l = r'(\x.(attack x))'
+#t = parse_lambda(l)
+#print t
+#t = binarize_term(t)
+#print t
+#s = term_to_sequence(t)
+#print s
 
-l = r'(\x.(attack x))'
-t = parse_lambda(l)
-print t
-t = binarize_term(t)
-print t
-s = term_to_sequence(t)
-print s
+import play
+import replay_to_html
+import shlex
+import webbrowser
+
+#play.main(*shlex.split('--replay battery.rpl the_battery_bot() IdleBot()'))
+#replay_to_html.main('battery.rpl')
+webbrowser.open('battery.html')
