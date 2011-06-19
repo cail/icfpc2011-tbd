@@ -60,19 +60,22 @@ class MultipleLambdaSequencesBot(Bot):
 
 class LoopDeLoop(Bot):
     def __init__(self):
+        self.terminate = False
         voltage = number_term(8192)
+        otake = number_term(768)
         self.sequence = MultipleLambdaSequencesBot([
+                                                   ####(2, r'(\icomb. (icomb K (icomb get (succ (succ zero))) icomb) ((icomb get zero) (icomb get (succ zero))))'),
+                                                   ####(2, r'(\zeroarg icomb. (K (icomb (get (succ (succ zero))) (succ zeroarg) icomb)) ((icomb get zero) zeroarg))'),
+                                                   ###(2, r'(\zeroarg icomb. ((icomb get) (succ (succ zero)) (succ zeroarg)) ((icomb get) zero zeroarg))'),
+                                                   ###(0, r'(\x. help x x voltage)'),
+                                                   ####(1, r'(voltage)'),
+                                                   ###(3, r'((get (succ (succ zero))) zero I)'),
                                                    #(2, r'(\icomb. (icomb K (icomb get (succ (succ zero))) icomb) ((icomb get zero) (icomb get (succ zero))))'),
                                                    #(2, r'(\zeroarg icomb. (K (icomb (get (succ (succ zero))) (succ zeroarg) icomb)) ((icomb get zero) zeroarg))'),
-                                                   (2, r'(\zeroarg icomb. ((icomb get) (succ (succ zero)) (succ zeroarg)) ((icomb get) zero zeroarg))'),
-                                                   (0, r'(\x. help x x voltage)'),
-                                                   #(1, r'(voltage)'),
-                                                   (3, r'((get (succ (succ zero))) zero I)'),
-                                                   (3, r'((get (succ (succ zero))) zero I)'),
-                                                   (3, r'((get (succ (succ zero))) zero I)'),
-                                                   (3, r'((get (succ (succ zero))) zero I)'),
-                                                   (3, r'((get (succ (succ zero))) zero I)'),
-                                                   (3, r'((get (succ (succ zero))) zero I)'),
+                                                   (0, r'(\icomb. ((icomb get) zero) ((icomb get) (succ zero) ((icomb get) (succ (succ zero)))))'),
+                                                   (1, r'(\x. (\ic. (ic attack) zero x otake) ((K I x help) zero zero voltage))'),
+                                                   (2, r'(zero)'),
+                                                   (3, r'(put I get zero I)'),
                                                    ], locals())
 
     def set_game(self, game):
@@ -80,6 +83,17 @@ class LoopDeLoop(Bot):
         self.sequence.set_game(game)
 
     def choose_move(self):
-        return self.sequence.choose_move()
+        if self.terminate:
+            self.sequence = MultipleLambdaSequencesBot([
+                                                       (3, r'(put I get zero I)'),
+                                                       ], locals())
+            self.sequence.set_game(self.game)
+            self.terminate = False
+            return (LEFT_APP, 2, cards.succ)
+        move = self.sequence.choose_move()
+        if move != None:
+            return move
+        self.terminate = True
+        return self.choose_move()
 
 

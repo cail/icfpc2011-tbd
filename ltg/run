@@ -1,2 +1,2 @@
 #!/bin/sh
-python src/play.py 'SampleNetworkBot()' 'SampleNetworkBot()' $*
+python src/play.py 'loop_de_loop_bot()' 'loop_de_loop_bot()' $*
