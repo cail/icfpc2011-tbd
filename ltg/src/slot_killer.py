@@ -4,7 +4,7 @@ import sys
 from rules import cards, SLOTS, MAX_SLOT, LEFT_APP, RIGHT_APP
 from sequence_bot import SequenceBot
 from simple_bot import Bot
-from terms import number_term, term_to_sequence, binarize_term, parse_lambda
+from terms import number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda
 
 
 def slot_killer_bot():
@@ -22,12 +22,16 @@ class SequenceBotNone(SequenceBot):
 
 
 class BoostBattery(Bot):
-    def __init__(self, battery_slot):
+    def __init__(self, battery_slot, execution_slot = None):
         self.battery_slot = battery_slot
+        self.execution_slot = execution_slot
+        if self.execution_slot == None:
+            self.execution_slot = self.battery_slot
 
     def set_game(self, game):
         super(BoostBattery, self).set_game(game)
-        self.boost = self.game.proponent.vitalities[self.battery_slot] * 9 / 10
+        self.boost = number_term_with_min_seq_cost(self.game.proponent.vitalities[self.battery_slot] * 90 / 100,
+                                                   self.game.proponent.vitalities[self.battery_slot] * 75 / 100)
         self.sequence = self.mk_seq()
         #print>>sys.stderr, ('boosting ' + str(self.battery_slot) + ' for ' + str(self.boost))
 
@@ -41,25 +45,35 @@ class BoostBattery(Bot):
         boost = number_term(self.boost)
         sequence = []
         for t in [
-            r'(help batslot batslot boost)',
+            r'(S help I batslot boost)',
             ]:
             t = parse_lambda(t, locals())
             t = binarize_term(t)
             sequence += term_to_sequence(t)
-        seq = SequenceBotNone(sequence, self.battery_slot)
+        seq = SequenceBotNone(sequence, self.execution_slot)
         seq.set_game(self.game)
         return seq
 
 
 class AttackSlot(Bot):
-    def __init__(self, battery_slot, target_slot):
+    def __init__(self, battery_slot, target_slot, execution_slot = None, reserve = 30000):
         self.battery_slot = battery_slot
         self.target_slot = target_slot
+        self.execution_slot = execution_slot
+        if self.execution_slot == None:
+            self.execution_slot = self.battery_slot
+        self.reserve = reserve
 
     def set_game(self, game):
         super(AttackSlot, self).set_game(game)
-        self.dmg = min(self.game.opponent.vitalities[self.target_slot] * 10 / 9,
-                       self.game.proponent.vitalities[self.battery_slot] / 2) + 10
+        if self.game.opponent.vitalities[self.target_slot] * 10 / 9 < (self.game.proponent.vitalities[self.battery_slot] - 8 - self.reserve):
+            self.dmg = number_term_with_min_seq_cost(self.game.opponent.vitalities[self.target_slot] * 10 / 9 + 8,
+                                                     self.game.opponent.vitalities[self.target_slot] * 12 / 9 + 8)
+        else:
+        #    self.dmg = number_term_with_min_seq_cost((self.game.opponent.vitalities[self.battery_slot] - 10000) * 7 / 16 + 8,
+        #                                             (self.game.opponent.vitalities[self.battery_slot] - 10000) * 9 / 16 + 8)
+            self.dmg = number_term_with_min_seq_cost((self.game.opponent.vitalities[self.battery_slot] - 8 - self.reserve) * 4 / 5,
+                                                     (self.game.opponent.vitalities[self.battery_slot] - 8 - self.reserve))
         self.sequence = self.mk_seq()
         #print>>sys.stderr, ('attacking ' + str(self.target_slot) + ' with ' + str(self.battery_slot) + ' for ' + str(self.dmg))
 
@@ -80,7 +94,7 @@ class AttackSlot(Bot):
             t = parse_lambda(t, locals())
             t = binarize_term(t)
             sequence += term_to_sequence(t)
-        seq = SequenceBotNone(sequence, self.battery_slot)
+        seq = SequenceBotNone(sequence, self.execution_slot)
         seq.set_game(self.game)
         return seq
 
