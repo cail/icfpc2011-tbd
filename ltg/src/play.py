@@ -4,7 +4,7 @@ import argparse
 import rules
 from rules import LEFT_APP, RIGHT_APP, card_by_name
 from game import Game
-from simple_bot import IdleBot, RandomBot, InteractiveBot
+from simple_bot import IdleBot, RandomBot, InteractiveBot, San
 from idiot_bot import test_idiot_bot
 from sequence_bot import test_seq_bot
 from slot_killer import slot_killer_bot

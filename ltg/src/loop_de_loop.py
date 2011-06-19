@@ -5,7 +5,7 @@ from rules import cards, SLOTS, MAX_SLOT, LEFT_APP, RIGHT_APP
 from sequence_bot import SequenceBot
 from simple_bot import Bot
 from slot_killer import SequenceBotNone
-from terms import number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda, unfold_numbers
+from terms import scnt, number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda, unfold_numbers
 
 
 def loop_de_loop_bot():
@@ -41,6 +41,7 @@ class LambdaSequenceBot(Bot):
 
 class MultipleLambdaSequencesBot(Bot):
     def __init__(self, bots, lcl):
+        self.boostable = True
         self.lcl = lcl
         self.bots = []
         for bot_slot, bot_lmb in bots:
@@ -51,19 +52,36 @@ class MultipleLambdaSequencesBot(Bot):
         for bot in self.bots:
             bot.set_game(game)
 
+    def boost_muthafucka(self, critical_slot):
+        self.boostable = False
+        boost = number_term(8192)
+        boost_slot = reduce(lambda x, y: y if scnt(y[0]) < scnt(x[0]) and y[0] > 3 and y[1] >= 10000 else x, zip(range(SLOTS), self.game.proponent.vitalities), (255, 0))[0]
+        crtslot = number_term(critical_slot)
+        bstslot = number_term(boost_slot)
+        boost_bot = LambdaSequenceBot(boost_slot, r'(put I help bstslot crtslot boost)', locals())
+        boost_bot.set_game(self.game)
+        self.bots.insert(0, boost_bot)
+
     def choose_move(self):
+        if self.boostable:
+            for critical_slot in range(4):
+                if self.game.proponent.vitalities[critical_slot] < 60000:
+                    self.boost_muthafucka(critical_slot)
+                    break
         for bot in self.bots:
             move = bot.choose_move()
             if move != None:
                 return move
+        self.boostable = True
         return None
 
 
 class LoopDeLoop(Bot):
     def __init__(self):
         self.terminate = False
-        voltage = number_term(8192)
-        otake = number_term(768)
+        voltage = number_term(40960)
+        otake = number_term(4096)
+        tgt = number_term(255)
         self.sequence = MultipleLambdaSequencesBot([
                                                    ####(2, r'(\icomb. (icomb K (icomb get (succ (succ zero))) icomb) ((icomb get zero) (icomb get (succ zero))))'),
                                                    ####(2, r'(\zeroarg icomb. (K (icomb (get (succ (succ zero))) (succ zeroarg) icomb)) ((icomb get zero) zeroarg))'),
@@ -83,14 +101,50 @@ class LoopDeLoop(Bot):
         super(LoopDeLoop, self).set_game(game)
         self.sequence.set_game(game)
 
+    def spider_sense(self):
+        return reduce(lambda x, y: y if len(str(y[1])) > len(str(x[1])) and len(str(y[1])) > 32 and y[2] > 0 else x, zip(range(SLOTS), self.game.opponent.values, self.game.opponent.vitalities), (-1, '', 0))[0]
+
+    def we_re_done_for(self):
+        return (self.game.proponent.vitalities[0] <= 0 or
+                self.game.proponent.vitalities[1] <= 0 or
+                self.game.proponent.vitalities[2] <= 0 or
+                self.game.proponent.vitalities[3] <= 0)
+
     def choose_move(self):
         if self.terminate:
-            self.sequence = MultipleLambdaSequencesBot([
-                                                       (3, r'(put I get zero I)'),
-                                                       ], locals())
-            self.sequence.set_game(self.game)
-            self.terminate = False
-            return (LEFT_APP, 2, cards.succ)
+            danger = self.spider_sense()
+
+            if self.we_re_done_for():
+                return (LEFT_APP, 0, cards.I)
+            elif danger != -1:
+                dng = number_term(MAX_SLOT - danger)
+                self.sequence = MultipleLambdaSequencesBot([
+                                                           (2, r'(put I dng)'),
+                                                           (3, r'(put I get zero I)'),
+                                                           ], locals())
+                self.sequence.set_game(self.game)
+                self.terminate = False
+                return self.choose_move()
+            elif self.game.opponent.vitalities[MAX_SLOT - self.game.proponent.values[2]] > 0:
+                self.sequence = MultipleLambdaSequencesBot([
+                                                           (3, r'(put I get zero I)'),
+                                                           ], locals())
+                self.sequence.set_game(self.game)
+                self.terminate = False
+                return self.choose_move()
+            elif self.game.proponent.values[2] == 255:
+                self.sequence = MultipleLambdaSequencesBot([
+                                                           (2, r'(put I zero)'),
+                                                           ], locals())
+                self.sequence.set_game(self.game)
+                self.terminate = False
+                return self.choose_move()
+            elif self.game.opponent.vitalities[MAX_SLOT - self.game.proponent.values[2]] <= 0:
+                self.terminate = False
+                return (LEFT_APP, 2, cards.succ)
+            else:
+                self.terminate = False
+                return (LEFT_APP, 2, cards.succ)
         move = self.sequence.choose_move()
         if move != None:
             return move

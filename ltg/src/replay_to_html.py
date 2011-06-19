@@ -5,7 +5,7 @@ from game import Game
 from simple_bot import PlaybackBot
 from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 
-HEAD = 3300 # how many head and tail moves we show
+HEAD = 750 # how many head and tail moves we show
 TAIL = 20
 
 def main(replay_name):
