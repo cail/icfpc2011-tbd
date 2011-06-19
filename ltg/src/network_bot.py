@@ -162,4 +162,3 @@ class SampleNetworkBot(NetworkBot):
             return self.zombie_plan()
         
         #assert plan_checker()
-        return plan, plan_checker

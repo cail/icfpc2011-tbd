@@ -5,7 +5,7 @@ from rules import cards, SLOTS, MAX_SLOT, LEFT_APP, RIGHT_APP
 from sequence_bot import SequenceBot
 from simple_bot import Bot
 from slot_killer import SequenceBotNone
-from terms import number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda
+from terms import number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda, unfold_numbers
 
 
 def loop_de_loop_bot():
@@ -32,6 +32,7 @@ class LambdaSequenceBot(Bot):
             ]:
             t = parse_lambda(t, self.lcl)
             t = binarize_term(t)
+            t = unfold_numbers(t)
             sequence += term_to_sequence(t)
         seq = SequenceBotNone(sequence, self.slot)
         seq.set_game(self.game)
@@ -73,8 +74,8 @@ class LoopDeLoop(Bot):
                                                    ###(3, r'((get (succ (succ zero))) zero I)'),
                                                    #(2, r'(\icomb. (icomb K (icomb get (succ (succ zero))) icomb) ((icomb get zero) (icomb get (succ zero))))'),
                                                    #(2, r'(\zeroarg icomb. (K (icomb (get (succ (succ zero))) (succ zeroarg) icomb)) ((icomb get zero) zeroarg))'),
-                                                   (0, r'(\icomb. ((icomb get) zero) ((icomb get) (succ zero) ((icomb get) (succ (succ zero)))))'),
-                                                   (1, r'(\x. (\ic. (ic attack) zero x otake) ((K I x help) zero zero voltage))'),
+                                                   (0, r'(\icomb. icomb get 0 (icomb get 1 (icomb get 2)))'),
+                                                   (1, r'(\x. (\ic. ic attack 0 x otake) (K I x help 0 0 voltage))'),
                                                    (2, r'(zero)'),
                                                    (3, r'(put I get zero I)'),
                                                    ], locals())

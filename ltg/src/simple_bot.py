@@ -39,6 +39,28 @@ class RandomBot(Bot):
             self.rnd.choice(self.slots_range),
             self.rnd.choice(card_by_name.values()))
 
+class San(Bot):
+    def __init__(self, bot):
+        self.bot = bot
+    def set_game(self, game):
+        self.game = game
+        self.bot.set_game(game)
+    def choose_move(self):
+        try:
+            move = self.bot.choose_move()
+            dir, slot, card = move
+            if dir not in 'lr':
+                raise Exception('wrong dir')
+            if slot not in range(SLOTS):
+                raise Exception('wrong slot')
+            if card not in card_by_name.values():
+                raise Exception('wrong card')
+            return move
+        except:
+            print>>sys.stderr, 'San!!!'
+            return ('r', 0, cards.S)
+
+        
 
 class InteractiveBot(Bot):
     def read_slot(self):
