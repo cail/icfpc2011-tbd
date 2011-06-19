@@ -1,3 +1,6 @@
+
+import sys
+
 from pprint import pprint
 
 from rules import card_by_name, cards
@@ -183,6 +186,7 @@ def apply_sequences(left, right):
 
 
 def term_to_sequence(term):
+    #print>>sys.stderr, sequential_cost(term)
     if isinstance(term, App):
         left, right = term
         if not isinstance(left, App):
