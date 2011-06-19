@@ -1,2 +1,2 @@
 #!/bin/sh
-python src/play.py 'the_battery_bot()' 'the_battery_bot()' $*
+python src/play.py 'SampleNetworkBot()' 'SampleNetworkBot()' $*
