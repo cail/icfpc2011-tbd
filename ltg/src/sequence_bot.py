@@ -8,7 +8,7 @@ from terms import number_term, term_to_sequence, binarize_term, parse_lambda
 
 class SequenceBot(Bot):
     def __init__(self, sequence, slot):
-        print>>sys.stderr, 'sequence length', len(sequence)
+        #print>>sys.stderr, 'sequence length', len(sequence)
         self.it = iter(sequence)
         self.slot = slot
         
@@ -25,7 +25,7 @@ def attack_term(i, j, n):
     return (cards.attack, i, j, n)
                    
        
-def test_seq_bot():
+def test_seq_bot(slot = 0):
     n = number_term(8192)
     m = number_term(INITIAL_VITALITY)
 
@@ -42,6 +42,6 @@ def test_seq_bot():
         t = parse_lambda(t, locals())
         t = binarize_term(t)
         sequence += term_to_sequence(t)
-    slot = 0
+
     return SequenceBot(sequence, slot)
 
