@@ -142,6 +142,14 @@ def term_to_str(term):
 
 def number_term(n):
     assert 0 <= n < 65536
+    
+    if n == 65535:
+        # use saturation
+        result = (cards.succ, cards.zero)
+        for _ in range(16):
+            result = (cards.dbl, result)
+        return result
+        
     if n == 0:
         return cards.zero
     if n%2 == 1:
@@ -195,7 +203,7 @@ def parse_lambda(s, locals={}):
 
 
 if __name__ == '__main__':
-    t = ((cards.get, number_term(4)), (cards.get, number_term(5)))
+    t = ((cards.get, number_term(65535)), (cards.get, number_term(5)))
 
     #print term_to_str(t)
     pprint(t)
