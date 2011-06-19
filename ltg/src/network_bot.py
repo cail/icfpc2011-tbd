@@ -17,8 +17,9 @@ class NetworkBot(Bot):
     def __init__(self, debug=False):
         self.net = None
         self.debug = debug
+        self.prev_success = True
         
-    def make_plan(self):
+    def make_plan(self, prev_success):
         'return (plan, plan_checker)'
         raise NotImplementedError()
     
@@ -27,23 +28,29 @@ class NetworkBot(Bot):
         i = 0
         while True:
             i += 1
-            if i > 100:
+            if i > 1000:
                 if self.debug:
                     print>>sys.stderr, 'we are stuck in plan making'
                 assert False, 'we are stuck in plan making'
                 return ('l', 0, cards.I)
                 
             if self.net is None:
-                self.net, self.checker = self.make_plan()
+                self.net, self.checker = self.make_plan(self.prev_success)
+                self.prev_success = False # unless shown otherwise
                 if self.net == NO_PLAN:
                     return ('l', 0, cards.I)                
+                if self.debug:
+                    print>>sys.stderr, 'NEW PLAN:', self.net
                 self.net.refine()
                 self.net.begin()
                 if self.debug:
-                    print>>sys.stderr, 'NEW PLAN:', self.net
+                    print>>sys.stderr, 'DETAILED PLAN:', self.net
                 if not self.checker():
                     if self.debug:
                         print>>sys.stderr, 'plan was impossible from the beginning'
+                    self.net = None
+                    continue
+                
                 if self.debug:
                     raw_input()
             
@@ -54,6 +61,7 @@ class NetworkBot(Bot):
                 if self.debug:
                     print>>sys.stderr, 'finished'
                 self.net = None
+                self.prev_success = True
                 continue
             
             if not self.checker():
@@ -137,14 +145,12 @@ class SampleNetworkBot(NetworkBot):
             13: '(zombie {0} {1})'.format(255-target, lazy_help),
         })
         
-        plan.dont_touch(*range(100)) # just for example
-        
         def plan_checker():
             return True # TODO:
         
         return plan, plan_checker
     
-    def make_plan(self):
+    def make_plan(self, prev_success):
         self.plans_limit -= 1
         if self.plans_limit < 0:
             return NO_PLAN, None
