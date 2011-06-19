@@ -13,6 +13,7 @@ from kick_ass import kick_ass_bot
 from kick_ass_2 import kick_ass_2_bot
 from the_battery import the_battery_bot
 from network_bot import SampleNetworkBot
+from loop_de_loop import loop_de_loop_bot
 
 
 def send_move(direction, slot, card):
