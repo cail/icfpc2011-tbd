@@ -11,6 +11,7 @@ from slot_killer import slot_killer_bot
 from combo_bot import test_combo_bot
 from kick_ass import kick_ass_bot
 from kick_ass_2 import kick_ass_2_bot
+from the_battery import the_battery_bot
 from network_bot import SampleNetworkBot
 
 

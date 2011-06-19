@@ -165,10 +165,21 @@ def number_term(n):
     return (cards.dbl, number_term(n//2))
 
 
+scnt_memoized = dict()
+
+
+def scnt(i):
+    if not i in scnt_memoized:
+        scnt_memoized[i] = sequential_cost(number_term(i))
+    return scnt_memoized[i]
+
+
 def number_term_with_min_seq_cost(n, m):
-    r, rc = n, sequential_cost(number_term(n))
+    n = min(max(0, n), 65535)
+    m = min(max(0, m), 65535)
+    r, rc = n, scnt(n)
     for i in range(n, m):
-        ic = sequential_cost(number_term(i))
+        ic = scnt(i)
         if ic <= rc:
             r, rc = i, ic
     return r
