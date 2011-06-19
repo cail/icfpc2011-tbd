@@ -350,7 +350,7 @@ class Revive(Function):
         ensure_slot_number(arg)
         context.count_side_effect()
         if context.game.proponent.vitalities[arg] <= 0:
-            context.game.proponent.vitalities = 1
+            context.game.proponent.vitalities[arg] = 1
         return cards.I
     
 
