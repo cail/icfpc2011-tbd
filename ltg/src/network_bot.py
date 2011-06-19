@@ -100,8 +100,14 @@ class SampleNetworkBot(NetworkBot):
     
     def kill_plan(self):
         damage = 8192
-        attacker1 = 0
-        attacker2 = 1
+        
+        if self.plans_limit == 999: # first call
+            attacker1 = 0
+            attacker2 = 1
+        else:
+            attacker1 = randrange(100)
+            attacker2 = randrange(100)
+            
         target = SLOTS-1
         
         plan = lambdas_to_plan(self.game, {
@@ -138,14 +144,17 @@ class SampleNetworkBot(NetworkBot):
 
         target = SLOTS-1
         
-        def range_term(m, n):
-            return min(range(m, n), key=lambda i: sequential_cost(number_term(i)))
+        #def range_term(m, n):
+        #    return min(range(m, n), key=lambda i: sequential_cost(number_term(i)))
         
         help_term = '(help {0} {1})'.format(donor, acceptor)
-        strength = vits[donor]
+        if self.plans_limit == 998:
+            strength = 8704
+        else:
+            strength = vits[donor]
         #strength = range_term((vits[acceptor]*10+10)//11, vits[donor]+1)
-        assert strength <= vits[donor]
-        assert strength*11//10 >= vits[acceptor] 
+        #assert strength <= vits[donor], vits[donor]
+        #assert strength*11//10 >= vits[acceptor] 
         lazy_help = '(S (K {0}) (K {1}))'.format(help_term, strength)
          
         slot = randrange(SLOTS)
