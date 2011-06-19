@@ -5,8 +5,10 @@ import rules
 from rules import LEFT_APP, RIGHT_APP, card_by_name
 from game import Game
 from simple_bot import IdleBot, RandomBot, InteractiveBot
+from idiot_bot import test_idiot_bot
 from sequence_bot import test_seq_bot
 from slot_killer import slot_killer_bot
+from combo_bot import test_combo_bot
 
 
 def send_move(direction, slot, card):
@@ -63,7 +65,7 @@ def main(*argv):
         bots[1].set_game(game)
 
     while not game.is_finished():
-        #if game.half_moves % 1000 == 0:
+        #if game.half_moves % 10 == 0:
         #    print>>sys.stderr, 'half turn', game.half_moves
         if game.half_moves >= args.maxturns*2:
             break
