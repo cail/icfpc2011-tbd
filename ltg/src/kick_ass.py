@@ -140,15 +140,21 @@ class KickAss(Bot):
         self.gauge_slot = reduce(lambda x, y: y if y[1] > x[1] and y[0] != self.battery_slot and y[0] != self.battery_slot else x, zip(range(SLOTS), self.game.proponent.vitalities), (0, 0))[0]
         if old_gauge_slot != self.gauge_slot:
             self.battery_prepped = False
-        self.gauge = self.game.opponent.vitalities[self.target_slot]
-        if self.gauge > (self.game.proponent.vitalities[self.battery_slot] - 10000) / 2:
-            self.gauge = (self.game.proponent.vitalities[self.battery_slot] - 10000) / 2
-        if self.gauge < 10:
-            self.gauge = 10
+        self.gauge = self.recommend_gauge()
 
     def pick_target(self):
         self.target_slot = reduce(lambda x, y: y if y[1] < x[1] and y[1] != 0 else x, zip(range(SLOTS), self.game.opponent.vitalities), (0, 100500))[0]
         self.pick_gauge()
+
+    def recommend_gauge(self):
+        gauge = self.game.opponent.vitalities[self.target_slot]
+        if gauge > (self.game.proponent.vitalities[self.battery_slot] - 10000) / 2:
+            gauge = (self.game.proponent.vitalities[self.battery_slot] - 10000) / 2
+        if self.game.proponent.vitalities[self.battery_slot] < 50000:
+            gauge = 10
+        if gauge < 10:
+            gauge = 10
+        return gauge
 
     def change_of_plans(self):
         if not self.is_battery_prepped():
@@ -168,8 +174,10 @@ class KickAss(Bot):
         return self.battery_prepped
 
     def is_target_painted(self):
-        return self.game.proponent.vitalities[self.observer_slot] > 1000 and self.game.proponent.values[self.observer_slot] == MAX_SLOT - self.target_slot
+        return (self.game.proponent.vitalities[self.observer_slot] > 1000 and self.game.proponent.values[self.observer_slot] == MAX_SLOT - self.target_slot and
+                self.game.opponent.vitalities[self.target_slot] > 0)
 
     def is_gauge_set(self):
-        return self.game.proponent.vitalities[self.gauge_slot] > 1000 and self.game.proponent.values[self.gauge_slot] == self.gauge
+        return (self.game.proponent.vitalities[self.gauge_slot] > 1000 and self.game.proponent.values[self.gauge_slot] == self.gauge and
+                self.gauge >= self.recommend_gauge() * 2 / 3)
 
