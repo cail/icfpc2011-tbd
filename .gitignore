@@ -7,5 +7,4 @@
 *.gz
 *.diff
 *.swp
-/ltg/src/replay.txt
-/ltg/our.html
+*.html
