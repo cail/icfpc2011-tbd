@@ -41,6 +41,9 @@ replay replayer (бот, который берёт свои ходы из реп
 
 generate_***_sequence should accept 'basis' parameter, which is a term we allowed to start from
 
+надо сразу в какой-нибудь слот положить copy
+чтобы если в нуле у противника появится что-то интересное, тут же спиздить!
+
 ****** DONE
 Мемоизация для конструкторов функций.
 
