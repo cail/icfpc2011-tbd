@@ -1,5 +1,5 @@
-
-from rules import INITIAL_VITALITY, SLOTS, MAX_TURNS, LEFT_APP, RIGHT_APP
+from time import clock
+from rules import INITIAL_VITALITY, SLOTS, MAX_TURNS, LEFT_APP, RIGHT_APP, TURN_TIME, TOTAL_TIME
 from rules import apply, cards, Context, Error
 from bot_io import ThunkIo
 
@@ -32,8 +32,28 @@ class Game(object):
         self.half_moves = 0
         self.move_history = []
 
+        self._turn_start_time = None
+        self._total_elapsed_time = 0.0
+
         #self.proponent.vitalities[13] = -1
         #self.proponent.values[13] = zero
+    
+    
+    def start_timer(self):
+        assert self._turn_start_time is None
+        self._turn_start_time = clock()
+        
+    def stop_timer(self):
+        self._total_elapsed_time += clock() - self._turn_start_time
+        self._turn_start_time = None
+    
+    @property
+    def turn_time_left(self):
+        return TURN_TIME - (clock() - self._turn_start_time)
+
+    @property
+    def total_time_left(self):
+        return TOTAL_TIME - self._total_elapsed_time
         
     def is_finished(self):
         return \
