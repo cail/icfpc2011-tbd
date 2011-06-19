@@ -85,7 +85,7 @@ def main(*argv):
             game.start_timer()
         else:
             move = bot.choose_move()
-            #print>>sys.stderr, game.turn_time_left, game.total_time_left
+
             if bot_number is None: 
                 # pitting two bots together -- next bot's time slot starts right here.
                 game.stop_timer()
