@@ -166,6 +166,8 @@ def number_term(n):
 
 
 def number_term_with_min_seq_cost(n, m):
+    n = min(max(0, n), 65535)
+    m = min(max(0, m), 65535)
     r, rc = n, sequential_cost(number_term(n))
     for i in range(n, m):
         ic = sequential_cost(number_term(i))
