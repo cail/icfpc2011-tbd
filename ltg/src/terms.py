@@ -227,6 +227,7 @@ def fold_numbers(term):
         return int(term)
     return term
     
+    
 def unfold_numbers(term):
     if isinstance(term, App):
         left, right = term
@@ -234,6 +235,13 @@ def unfold_numbers(term):
     if type(term) == int: # not isinstance, because IntValue derives from int
         return number_term(term)
     return term
+
+
+def is_subterm_eager(subterm, term):
+    '''return whether all ocurences of subterm will be evaluated during term 
+    construction using term_to_sequence
+    '''
+    return False
 
 
 if __name__ == '__main__':
