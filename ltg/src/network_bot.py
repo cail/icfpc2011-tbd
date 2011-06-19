@@ -100,8 +100,8 @@ class SampleNetworkBot(NetworkBot):
     
     def kill_plan(self):
         damage = 8192
-        attacker1 = randrange(SLOTS)
-        attacker2 = randrange(SLOTS)
+        attacker1 = 0
+        attacker2 = 1
         target = SLOTS-1
         
         plan = lambdas_to_plan(self.game, {
