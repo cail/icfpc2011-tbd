@@ -3,7 +3,7 @@ from time import clock
 import sys
 
 from rules import cards, AbstractFunction, Error, IntValue, Context, apply
-
+import terms
 
 if __name__ == '__main__':
     part = '1/1'
@@ -19,14 +19,14 @@ if __name__ == '__main__':
     #    'get({0})(get({1}))'.format(i, j) 
     #    for i in range(4) for j in range(4)
     #    ])
-    desired = set(['X(Z)(Y(T))'])
+    desired = set(['numbers'])
     print 'search for', desired, 'part', part
     
     allowed_functions = [
-        x, y, z, #t,
+        #x, y, z, #t,
         #get,
-        #cards.zero, cards.succ, cards.dbl,
-        cards.put, # useless combinator? 
+        cards.zero, cards.succ, cards.dbl,
+        #cards.put, # useless combinator? 
         cards.I, cards.K, cards.S]
     
     possible_steps = [(f, dir) for dir in 'rl' for f in allowed_functions]
@@ -40,11 +40,22 @@ if __name__ == '__main__':
     
     context = Context(None)
     
+    optimized_numbers = set()
+    
     def rec(cur, depth):
         global cnt
-        if str(cur) in desired:
-            print len(steps), steps_to_str(steps), '->', cur
-            desired.remove(str(cur))
+        scur = str(cur)
+        
+        if scur.isdigit() and scur not in optimized_numbers:
+            t = terms.number_term(int(scur))
+            cost = terms.sequential_cost(t)
+            if cost > len(steps):
+                print len(steps), steps_to_str(steps), '->', scur
+            optimized_numbers.add(scur)
+            
+        if scur in desired:
+            print len(steps), steps_to_str(steps), '->', scur
+            desired.remove(scur)
             if len(desired) == 0:
                 print 'Done. Press enter to exit'
                 raw_input()
