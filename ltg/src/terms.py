@@ -211,11 +211,60 @@ def parse_lambda(s, locals={}):
     return parse_term(eliminate_abstraction(s), locals)
 
 
+def value_to_term(value):
+    if isinstance(value, IntValue):
+        return int(value)
+    # we depend on the fact that all functions with no arguments are cards themselves
+    if value.arg0 is None:
+        return value
+    card = card_by_name[value.canonical_name] # get corresponding card
+    r = (card, value_to_term(value.arg0))
+    if value.arg1 is not None:
+        r = (r, value_to_term(value.arg1))
+    return r
+
+
+def fold_numbers(term):
+    if isinstance(term, App):
+        left, right = term
+        left = fold_numbers(left)
+        right = fold_numbers(right)
+        if isinstance(right, int):
+            right = int(right)
+            if left == cards.succ:
+                return min(right+1, 65535)
+            elif left == cards.dbl:
+                return min(right*2, 65535)
+        return (left, right)
+    if isinstance(term, int):
+        return int(term)
+    return term
+    
+
+def unfold_numbers(term):
+    if isinstance(term, App):
+        left, right = term
+        return (unfold_numbers(left), unfold_numbers(right))
+    if type(term) == int: # not isinstance, because IntValue derives from int
+        return number_term(term)
+    return term
+
+
+def is_subterm_eager(subterm, term):
+    '''return whether all ocurences of subterm will be evaluated during term 
+    construction using term_to_sequence
+    '''
+    return False
+
+
 if __name__ == '__main__':
-    t = ((cards.get, number_term(65535)), (cards.get, number_term(5)))
+    t = ((cards.get, 65535), (cards.get, 5))
+    assert fold_numbers(unfold_numbers(t)) == t
 
     #print term_to_str(t)
     pprint(t)
+    
+    t = unfold_numbers(t)
     
     t = binarize_term(t)
     print 'optimal subterm', optimal_subterm(3, t)
@@ -232,3 +281,4 @@ if __name__ == '__main__':
         print "don't worry, evaluation is not fully supported BECAUSE."
 
 
+    

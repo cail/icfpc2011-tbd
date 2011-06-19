@@ -3,6 +3,7 @@ from rules import LEFT_APP, RIGHT_APP, card_by_name, apply, cards
 from rules import IntValue, Context, AbstractFunction, Error
 from rules import function_cache
 from pprint import pprint
+from terms import value_to_term
  
 
 def sequence_to_str(commands):
@@ -21,7 +22,7 @@ def parse_sequence(s):
 
 
 def eval_sequence(commands, start=cards.I, debug=False):
-    get = AbstractFunction.create('get', IntValue)
+    get = AbstractFunction.create('<get>', IntValue)
     context = Context(None)
     state = start
     for cmd, side in commands:
@@ -32,7 +33,7 @@ def eval_sequence(commands, start=cards.I, debug=False):
         else:
             state = apply(cmd, state, context)
         if debug:
-            print cmd, side, ':', state
+            print cmd, side, ':', state, ':', value_to_term(state)
     return state
 
     
