@@ -72,13 +72,13 @@ def subterms(*terms):
  
 
 def replace_leaf_subterm(template, pattern, term):
-     if term == template:
-         return pattern
-     if isinstance(term, App):
-         left, right = term
-         return (replace_leaf_subterm(template, pattern, left), 
-                 replace_leaf_subterm(template, pattern, right))
-     return term
+    if term == template:
+        return pattern
+    if isinstance(term, App):
+        left, right = term
+        return (replace_leaf_subterm(template, pattern, left), 
+                replace_leaf_subterm(template, pattern, right))
+    return term
  
 assert replace_leaf_subterm((1,2), (3, 4), ((1, 2), (3, 4))) == ((3, 4), (3, 4))
      
@@ -258,5 +258,5 @@ if __name__ == '__main__':
         print '----'
         print 'Error', e
         print "don't worry, evaluation is not fully supported BECAUSE."
-    
-    
+
+

@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import sys
 
 __all__ = [
@@ -81,117 +81,153 @@ def apply(f, arg, context):
 function_cache = defaultdict(dict)
 
 class Function(object):
-    if MEMOIZE_FUNCTIONS:
-        @classmethod
-        def create(cls, *args):
-            # TODO: put memoization shit into separate module
-            cache = function_cache[cls]
-            if args not in cache:
-                cache[args] = cls(*args)
-            return cache[args]
-    else:
-        @classmethod
-        def create(cls, *args):
-            return cls(*args)
-        
-    def apply(self, arg, context):
-        raise NotImplementedError()
-    def __str__(self):
-        return self.canonical_name
-    def partial_str(self, *args):
-        return self.canonical_name + ''.join('({0})'.format(arg) for arg in args)
-    def __repr__(self):
-        return str(self)
     # Note! Functions lack structural hash and comparisons,
     # because it's convenient for memoization.
     # Reference inequality does not guarantee structural inequality.
     # So far we do not need structural comparison at all.
     # As a quick hack one can compare str()'s.
+    
+    __slots__ = ['arg0', 'arg1']
+    # canonical_name = 'BaseFunction' # all canonical names are set in _init_canonical_names
+    
+    def __new__(cls, arg0, arg1):
+        obj = object.__new__(cls)
+        obj.arg0 = arg0
+        obj.arg1 = arg1
+        return obj
+        
+    if MEMOIZE_FUNCTIONS:
+        @classmethod
+        def create(cls, arg0 = None, arg1 = None):
+            # TODO: put memoization shit into separate module
+            cache = function_cache[cls]
+            args = (arg0, arg1)
+            if args not in cache:
+                cache[args] = cls(arg0, arg1)
+            return cache[args]
+    else:
+        @classmethod
+        def create(cls, arg0 = None, arg1 = None):
+            return cls(arg0, arg1)
+        
+    def apply(self, arg, context):
+        raise NotImplementedError()
+    
+    def __str__(self):
+        def generate():
+            yield self.canonical_name
+            a0, a1 = self.arg0, self.arg1
+            if a0 is None: return # fast path, no outer parentheses
+            close_paren = ')'
+            if a1 is not None:
+                stack = [close_paren, a1, close_paren, a0]
+            else:
+                stack = [close_paren, a0]
+            # pseudorecursion
+            while stack:
+                it = stack.pop()
+                if it is close_paren:
+                    yield it
+                    continue
+                yield '(' + it.canonical_name
+                a0, a1 = it.arg0, it.arg1
+                if a0 is not None:
+                    if a1 is not None:
+                        stack.append(close_paren)
+                        stack.append(a1)
+                    stack.append(close_paren)
+                    stack.append(a0)
+        return ''.join(generate())
+    
+    def __repr__(self):
+        return str(self)
 
 
-# this class is here because all functions are
 class AbstractFunction(Function):
-    def __init__(self, name, required_type=None):
-        self.name = name
-        self.required_type = required_type
+    # crazy hacks follow!
+    __slots__ = ['canonical_name', 'required_type']
+    def __new__(cls, name, required_type=None):
+        obj = Function.__new__(cls, None, None)
+        obj.canonical_name = name
+        obj.required_type = required_type
+        return obj
+        
     def apply(self, arg, context):
         t = self.required_type
         if t is not None and not isinstance(arg, t):
             raise Error('wrong type')
-        return AbstractFunction.create('{0}({1})'.format(self.name, arg))
-    def __str__(self):
-        return self.name
+        return AbstractFunction('{0}({1})'.format(self.canonical_name, arg))
     
 
 class IntValue(int): # not a Function -- because it's not!
-    # we are not memoizing ints, so no need for create function
-    def apply(self, arg, context):
-        raise Error('Attempt to apply an integer')
-    def __str__(self):
+    __slots__ = []
+    arg0 = None
+    arg1 = None
+    @property
+    def canonical_name(self):
         if self == 0:
             return 'zero'
         return int.__str__(self)
-    # hash and comparison are taken from int, so it's ok
-
-
-class Identity(Function):
     def apply(self, arg, context):
-        return arg
-
-
-class K(Function):
-    def apply(self, arg, context):
-        return K1.create(arg)
-
-
-class K1(K):
-    'K with one argument applied'
-    def __init__(self, value):
-        self.value = value
-    def apply(self, arg, context):
-        return self.value
+        raise Error('Attempt to apply an integer')
     def __str__(self):
-        return self.partial_str(self.value)
-    
-    
-class S(Function):
-    def apply(self, arg, context):
-        return S1.create(arg)
+        return self.canonical_name
+    def __repr__(self):
+        return self.canonical_name
+
+def function(base = Function):
+    '''More clusters of metaparadigms'''
+    def wrapper(f):
+        name = f.__name__
+        doc = f.__doc__
+        f.__name__ = 'apply'
+        return type(name, (base,), {'__doc__' : doc,
+                                    '__slots__' : [], 
+                                    'apply' : f})
+    return wrapper
+                                  
+@function()
+def Identity(self, arg, context):
+    return arg
 
 
-class S1(S):
-    def __init__(self, f):
-        self.f = f
-    def apply(self, arg, context):
-        return S2.create(self.f, arg)
-    def __str__(self):
-        return self.partial_str(self.f)
+@function()
+def K(self, arg, context):
+    return K1.create(arg)
+
+
+@function(K)
+def K1(self, arg, context):
+    return self.arg0
     
     
-class S2(S):
-    def __init__(self, f, g):
-        self.f = f
-        self.g = g
-    def apply(self, arg, context):
-        h = apply(self.f, arg, context)
-        y = apply(self.g, arg, context)
-        return apply(h, y, context)
-    def __str__(self):
-        return self.partial_str(self.f, self.g)
+@function()
+def S(self, arg, context):
+    return S1.create(arg)
+
+
+@function(S)
+def S1(self, arg, context):
+    return S2.create(self.arg0, arg)
     
     
-class Succ(Function):
-    def apply(self, arg, context):
-        if isinstance(arg, Function):
-            raise Error('Succ applied to function')
-        return IntValue(min(arg+1, 65535))
+@function(S)
+def S2(self, arg, context):
+    h = apply(self.arg0, arg, context)
+    y = apply(self.arg1, arg, context)
+    return apply(h, y, context)
     
+@function()
+def Succ(self, arg, context):
+    if isinstance(arg, Function):
+        raise Error('Succ applied to function')
+    return IntValue(min(arg+1, 65535))
     
-class Double(Function):
-    def apply(self, arg, context):
-        if isinstance(arg, Function):
-            raise Error('Dbl applied to function')
-        return IntValue(min(arg*2, 65535))
+@function()
+def Double(self, arg, context):
+    if isinstance(arg, Function):
+        raise Error('Dbl applied to function')
+    return IntValue(min(arg*2, 65535))
     
 
 def ensure_slot_number(value):
@@ -201,18 +237,18 @@ def ensure_slot_number(value):
         raise Error('Slot number not in range')
     
     
-class Get(Function):
-    def apply(self, arg, context):
-        ensure_slot_number(arg)
-        context.count_side_effect()
-        if context.game.proponent.vitalities[arg] <= 0:
-            raise Error('Get applied to a dead slot number')
-        return context.game.proponent.values[arg]
+@function()
+def Get(self, arg, context):
+    ensure_slot_number(arg)
+    context.count_side_effect()
+    if context.game.proponent.vitalities[arg] <= 0:
+        raise Error('Get applied to a dead slot number')
+    return context.game.proponent.values[arg]
 
     
-class Put(Function):
-    def apply(self, arg, context):
-        return cards.I
+@function()
+def Put(self, arg, context):
+    return cards.I
 
 
 def increase_vitality(player, slot, amount=1):
@@ -227,152 +263,126 @@ def decrease_vitality(player, slot, amount=1):
         player.vitalities[slot] = max(0, vitality - amount)
 
     
-class Attack(Function):
-    def apply(self, arg, context):
-        return Attack1.create(arg)    
+@function()
+def Attack(self, arg, context):
+    return Attack1.create(arg)    
     
     
-class Attack1(Attack):
-    def __init__(self, i):
-        self.i = i
-    def apply(self, arg, context):
-        return Attack2.create(self.i, arg)
-    def __str__(self):
-        return self.partial_str(self.i)
+@function(Attack)
+def Attack1(self, arg, context):
+    return Attack2.create(self.arg0, arg)
 
     
-class Attack2(Attack):
-    def __init__(self, i, j):
-        self.i = i
-        self.j = j
-        
-    def apply(self, arg, context):
-        prop = context.game.proponent
-        opp = context.game.opponent
-        
-        ensure_slot_number(self.i)
-        if isinstance(arg, Function):
-            raise Error('attack strength is a function')
-        context.count_side_effect()
-        if arg > prop.vitalities[self.i]:
-            raise Error('too strong attack')
-        prop.vitalities[self.i] -= arg
-        
-        ensure_slot_number(self.j) # after decreasing our own slot
-        
-        if context.zombie:
-            increase_vitality(opp, MAX_SLOT-self.j, arg*9//10)
-        else:
-            decrease_vitality(opp, MAX_SLOT-self.j, arg*9//10)
-            
-        return cards.I
+@function(Attack)
+def Attack2(self, arg, context):
+    prop = context.game.proponent
+    opp = context.game.opponent
     
-    def __str__(self):
-        return self.partial_str(self.i, self.j)
-
-
-class Inc(Function):
-    def apply(self, arg, context):
-        ensure_slot_number(arg)
-        context.count_side_effect()
-        prop = context.game.proponent
-        if context.zombie:
-            decrease_vitality(prop, arg)
-        else:
-            increase_vitality(prop, arg)
-        return cards.I        
-
-
-class Dec(Function):
-    def apply(self, arg, context):
-        ensure_slot_number(arg)
-        context.count_side_effect()
-        opp = context.game.opponent
-        if context.zombie: 
-            increase_vitality(opp, MAX_SLOT - arg)
-        else:
-            decrease_vitality(opp, MAX_SLOT - arg)
-        return cards.I        
-
-
-class Help(Function):
-    def apply(self, arg, context):
-        return Help1.create(arg)    
-
-
-class Help1(Help):
-    def __init__(self, i):
-        self.i = i
-    def apply(self, arg, context):
-        return Help2.create(self.i, arg)
-    def __str__(self):
-        return self.partial_str(self.i)
-
-
-class Help2(Help):
-    def __init__(self, i, j):
-        self.i = i
-        self.j = j
-
-    def apply(self, arg, context):
-        prop = context.game.proponent
-        
-        ensure_slot_number(self.i)
-        if isinstance(arg, Function):
-            raise Error('help strength is a function')
-        context.count_side_effect()
-        if arg > prop.vitalities[self.i]:
-            raise Error('too strong help')
-        prop.vitalities[self.i] -= arg
-        
-        ensure_slot_number(self.j) # after decreasing the source slot
-        
-        if context.zombie:
-            decrease_vitality(prop, self.j, arg*11//10)
-        else:
-            increase_vitality(prop, self.j, arg*11//10)
-        
-        return cards.I    
-
-    def __str__(self):
-        return self.partial_str(self.i, self.j)
-
-
-class Copy(Function):
-    def apply(self, arg, context):
-        ensure_slot_number(arg)
-        context.count_side_effect()
-        return context.game.opponent.values[arg]
-
-
-class Revive(Function):
-    def apply(self, arg, context):
-        ensure_slot_number(arg)
-        context.count_side_effect()
-        if context.game.proponent.vitalities[arg] <= 0:
-            context.game.proponent.vitalities[arg] = 1
-        return cards.I
+    if isinstance(arg, Function):
+        raise Error('attack strength is a function')
     
+    ensure_slot_number(self.arg0)
+    context.count_side_effect()
+    if arg > prop.vitalities[self.arg0]:
+        raise Error('too strong attack')
+    prop.vitalities[self.arg0] -= arg
+    
+    ensure_slot_number(self.arg1) # after decreasing our own slot
+    
+    if context.zombie:
+        increase_vitality(opp, MAX_SLOT-self.arg1, arg*9//10)
+    else:
+        decrease_vitality(opp, MAX_SLOT-self.arg1, arg*9//10)
+        
+    return cards.I
 
-class Zombie(Function):
-    def apply(self, arg, context):
-        return Zombie1.create(arg)    
+
+@function()
+def Inc(self, arg, context):
+    ensure_slot_number(arg)
+    context.count_side_effect()
+    prop = context.game.proponent
+    if context.zombie:
+        decrease_vitality(prop, arg)
+    else:
+        increase_vitality(prop, arg)
+    return cards.I        
 
 
-class Zombie1(Zombie):
-    def __init__(self, i):
-        self.i = i
-    def apply(self, arg, context):
-        ensure_slot_number(self.i)
-        context.count_side_effect()
-        opp = context.game.opponent
-        if opp.vitalities[MAX_SLOT-self.i] > 0:
-            raise Error('can\'t zombify a living slot')
-        opp.values[MAX_SLOT-self.i] = arg
-        opp.vitalities[MAX_SLOT-self.i] = -1
-        return cards.I
-    def __str__(self):
-        return self.partial_str(self.i)
+@function()
+def Dec(self, arg, context):
+    ensure_slot_number(arg)
+    context.count_side_effect()
+    opp = context.game.opponent
+    if context.zombie: 
+        increase_vitality(opp, MAX_SLOT - arg)
+    else:
+        decrease_vitality(opp, MAX_SLOT - arg)
+    return cards.I        
+
+
+@function()
+def Help(self, arg, context):
+    return Help1.create(arg)    
+
+
+@function(Help)
+def Help1(self, arg, context):
+    return Help2.create(self.arg0, arg)
+
+
+@function(Help)
+def Help2(self, arg, context):
+    prop = context.game.proponent
+    
+    if isinstance(arg, Function):
+        raise Error('help strength is a function')
+    
+    ensure_slot_number(self.arg0)
+    context.count_side_effect()
+    if arg > prop.vitalities[self.arg0]:
+        raise Error('too strong help')
+    prop.vitalities[self.arg0] -= arg
+    
+    ensure_slot_number(self.arg1) # after decreasing the source slot
+    
+    if context.zombie:
+        decrease_vitality(prop, self.arg1, arg*11//10)
+    else:
+        increase_vitality(prop, self.arg1, arg*11//10)
+    
+    return cards.I
+
+@function()
+def Copy(self, arg, context):
+    ensure_slot_number(arg)
+    context.count_side_effect()
+    return context.game.opponent.values[arg]
+
+
+@function()
+def Revive(self, arg, context):
+    ensure_slot_number(arg)
+    context.count_side_effect()
+    if context.game.proponent.vitalities[arg] <= 0:
+        context.game.proponent.vitalities[arg] = 1
+    return cards.I
+    
+@function()
+def Zombie(self, arg, context):
+    return Zombie1.create(arg)    
+
+
+@function(Zombie)
+def Zombie1(self, arg, context):
+    ensure_slot_number(self.arg0)
+    context.count_side_effect()
+    opp = context.game.opponent
+    if opp.vitalities[MAX_SLOT-self.arg0] > 0:
+        raise Error('can\'t zombify a living slot')
+    opp.values[MAX_SLOT-self.arg0] = arg
+    opp.vitalities[MAX_SLOT-self.arg0] = -1
+    return cards.I
 
 
 class cards(object):
@@ -395,8 +405,10 @@ class cards(object):
 
 card_by_name = dict((k, v) for k, v in cards.__dict__.iteritems() if not k.startswith('_'))
 
-
 def _init_canonical_names():
     for name, card in card_by_name.iteritems():
-        card.__class__.canonical_name = name
+        cls = card.__class__ 
+        if not hasattr(cls, 'canonical_name'): # bc IntValue provides its own for example
+            cls.canonical_name = name
+    Function.canonical_name = 'BaseFunction'
 _init_canonical_names()

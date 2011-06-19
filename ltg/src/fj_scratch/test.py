@@ -1,4 +1,5 @@
-import play
-play.main('-h')
+from timeit import timeit
 
-# play.main('bot1', 'bot2', '3')
+print timeit('None.__str__')
+print timeit('getattr(None, "__str__", None)')
+
