@@ -165,6 +165,15 @@ def number_term(n):
     return (cards.dbl, number_term(n//2))
 
 
+def number_term_with_min_seq_cost(n, m):
+    r, rc = n, sequential_cost(number_term(n))
+    for i in range(n, m):
+        ic = sequential_cost(number_term(i))
+        if ic <= rc:
+            r, rc = i, ic
+    return r
+
+
 def canonical_sequence(seq):
     if len(seq) == 0 or seq[0][1] == 'l':
         seq = [(cards.I, 'r')]+seq
