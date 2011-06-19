@@ -11,6 +11,7 @@ from slot_killer import slot_killer_bot
 from combo_bot import test_combo_bot
 from kick_ass import kick_ass_bot
 from kick_ass_2 import kick_ass_2_bot
+from network_bot import SampleNetworkBot
 
 
 def send_move(direction, slot, card):
@@ -67,8 +68,8 @@ def main(*argv):
         bots[1].set_game(game)
 
     while not game.is_finished():
-        #if game.half_moves % 10 == 0:
-        #    print>>sys.stderr, 'half turn', game.half_moves
+        if game.half_moves % 10000 == 0:
+            print>>sys.stderr, 'half turn', game.half_moves
         if game.half_moves >= args.maxturns*2:
             break
         if game.has_zombie_phase():

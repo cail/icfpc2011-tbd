@@ -1,9 +1,11 @@
 from pprint import pprint
 import sys
 from copy import copy
+from collections import defaultdict
 
 from terms import number_term, optimal_subterm, replace_leaf_subterm,\
-    sequential_cost, subterms, term_to_sequence
+    sequential_cost, subterms, term_to_sequence, is_subterm_eager,\
+    fold_numbers
 import rules
 from rules import cards
 from game import Game
@@ -12,6 +14,7 @@ from game import Game
 FAIL = '0-FAIL'
 WAIT = '1-WAIT'
 OK = '2-OK  '
+RUNNING = '*-RUN '
 # for comparisons like FAIL < OK
 
 
@@ -21,63 +24,50 @@ class Requirement(object):
     def check(self, game):
         raise NotImplementedError()
     
-    
-class TermInSlotRequirement(Requirement):
-    def __init__(self, term, slot):
-        self.term = term
-        self.slot = slot
-        
-    def check(self, game):
-        prop = game.proponent
-        if prop.vitalities[self.slot] <= 0:
-            return FAIL
-        #if value_to_term(prop.vitalities[self.slot]) == self.term:
-        #    return OK
-        return WAIT
-    
-    def __str__(self):
-        term = str(self.term)
-        if len(term) > 10:
-            term = '...'
-        return 'REQUIRES {0}@{1}'.format(term, self.slot)
-    
             
 class Goal(object):
     def __init__(self, term, slot=None):
         self.term = term
         self.slot = slot
-        self.requirements = []
+        self.gets = set()
+        self.lazy_gets = set()
     
     def __str__(self):
-        return 'Goal(term={0}, slot={1}) [{2}] of cost {3}'.\
-            format(self.term, self.slot,
-                   '; '.join(map(str, self.requirements)),
+        result = 'Goal(term={0}, slot={1}) of cost {2}'.\
+            format(fold_numbers(self.term), self.slot,
                    self.cost())
+        if self.gets:
+            result += ', depends on {0}'.format(list(self.gets))
+        if self.lazy_gets:
+            result += ', lazily depends on {0}'.format(self.lazy_gets)
+        return result
     
     def name(self):
         return 'Goal@{0}'.format(self.slot)
     
-    def status(self, game):
-        result = OK
-        for req in self.requirements:
-            result = min(result, req.check(game)) 
-        return result
-            
-    def achieved(self, game):
-        prop = game.proponent
-        if prop.vitalities[self.slot] <= 0:
-            return False
-        return False
-        return value_to_term(prop.vitalities[self.slot]) == self.term
-    
     def cost(self):
         return sequential_cost(self.term)
     
-    def get_moves(self):
+    def get_moves(self, game):
         result = []
+        
+        if game.proponent.values[self.slot] != cards.I: # clear slot
+            result.append(('l', self.slot, cards.put))
+            
         for card, side in term_to_sequence(self.term):
             result.append((side, self.slot, card))
         return result
+    
+    def introduce_get(self, sub_term, register_access):
+        g, register_slot = fold_numbers(register_access)
+        assert isinstance(register_slot, int)
+        assert g == cards.get
+        
+        self.gets.add(register_slot)
+        
+        if not is_subterm_eager(sub_term, self.term):
+            self.lazy_gets.add(register_slot)
+        self.term = replace_leaf_subterm(sub_term, register_access, self.term)
 
 
 slot_numbers_by_reachability = sorted(
@@ -85,24 +75,63 @@ slot_numbers_by_reachability = sorted(
     key=lambda n: sequential_cost(number_term(n)))
 
 
+class NetworkFail(Exception):
+    pass
+
+
 class Network(object):
     def __init__(self, game):
         self.goals = []
         self.game = game
-        self.eternal_requirements = [] # for lazy
+        self.petrified_slots = set() # for lazy terms
         
-    def clone(self):
-        result = Network(self.game)
-        result.goals = map(copy, self.goals)
-        return result
+        self.slot_goals = defaultdict(set)
+        
+        self.instructions = []
+        self.current_goal = None
+
+    def is_finished(self):
+        return self.next_move is None
+
+    def get_next_move(self):
+        assert not self.is_finished()
+        move = self.next_move
+        self.next_move = self.pop_instruction()
+        return move
+
+    def begin(self):
+        self.next_move = self.pop_instruction()
+        
+    
+    def check(self):
+        'raise NetworkError if something is wrong'
+        need_alive = set()
+        need_alive |= self.petrified_slots
+        for goal in self.goals:
+            need_alive.add(goal.slot)
+            need_alive |= goal.gets
+        prop = self.game.proponent
+        for slot in need_alive:
+            if prop.vitalities[slot] <= 0:
+                raise NetworkFail('slot {0} is dead'.format(slot))
+        
+    def refine(self):
+        self.allocate_registers()
         
     def add_goal(self, goal):
+        self.slot_goals[goal.slot].add(goal)
         self.goals.append(goal)
+        
+    def remove_goal(self, goal):
+        assert goal in self.slot_goals[goal.slot]
+        self.slot_goals[goal.slot].remove(goal)
+        self.goals.remove(goal)
         
     def __str__(self):
         result = 'Goals:\n'
         for goal in self.goals:
-            result += '   {0}\n'.format(goal)
+            result += '   {0} {1}\n'.format(self.goal_status(goal), goal)
+        result += 'petrified slots: {0}\n'.format(self.petrified_slots)
         result += '({0} steps to construct)'.format(self.cost())
         return result
                 
@@ -125,85 +154,108 @@ class Network(object):
         
         if advantage <= 0:
             return False
-        print>>sys.stderr, 'advantage', advantage
         
         sub_goal = Goal(sub_term, register_slot)
         for goal in self.goals:
             if not sub_term in subterms(goal.term):
                 continue
-            goal.term = replace_leaf_subterm(sub_term, register_access, goal.term)
-            goal.requirements.append(TermInSlotRequirement(sub_term, register_slot))
-            #Arrow(sub_goal, goal) # TODO: only add dependency if needed
+            goal.introduce_get(sub_term, register_access)
+
         self.add_goal(sub_goal)
         
         return True
     
     def allocate_registers(self, regs=None):
-        if regs is None:
-            regs = slot_numbers_by_reachability[:5][::-1]
-        print>>sys.stderr, regs
+        #if regs is None:
+        #    regs = slot_numbers_by_reachability[:5][::-1]
+        regs = []
+        for reg in slot_numbers_by_reachability:
+            if self.is_slot_available(reg):
+                regs.append(reg)
+                if len(regs) > 2:
+                    break
+        regs.reverse()
         for slot in regs:
             self.allocate_register(slot)
         
     def cost(self):
         return sum(goal.cost() for goal in self.goals)
-    
+        
     def is_slot_available(self, slot_number):
         'alive and not used by other goal'
         prop = self.game.proponent
-        if prop.vitalities[slot_number] < 0:
+        if prop.vitalities[slot_number] <= 0:
             return False
-        for goal in self.goals:
-            if goal.slot == slot_number:
-                return False
-        for req in self.eternal_requirements:
-            assert type(req) == 
-        return True
-
-    def remove_achieved_goals(self):
-        new_goals = []
-        for goal in self.goals:
-            if not goal.achieved(self.game):
-                new_goals.append(goal)
-        self.goals = new_goals
+        if slot_number in self.petrified_slots:
+            return False
+        return len(self.slot_goals[slot_number]) == 0
     
-    def get_instructions(self):
+    def goal_status(self, goal):
+        if goal == self.current_goal:
+            return RUNNING
+        prop = self.game.proponent
+        
+        for slot in goal.gets:
+            if len(self.slot_goals[slot]) > 0:
+                return WAIT
+        
+        return OK
+
+    def select_goal(self):
         assert self.goals
         
         status = {}
         
         for goal in self.goals:
-            status[goal] = goal.status(self.game)
-            if status[goal] == FAIL:
-                print>>sys.stderr, 'network failed because of ', goal
-                return None
-                    
+            if self.goal_status(goal) == FAIL:
+                raise NetworkFail('network failed because of {0}'.format(goal))
+        #print status
+        
         for goal in self.goals:
-            assert not goal.achieved(self.game)
-            if goal.status(self.game) == OK:
-                return goal.get_moves()
+            if self.goal_status(goal) == OK:
+                #print>>sys.stderr, 'selected', goal
+                return goal
             
         assert set(status.values()) == set([WAIT])
+        raise NetworkFail('network failed because all goals are waiting')
+        
+    def pop_instruction(self):
+        while len(self.instructions) == 0:
+            # previous goal achieved
+            if self.current_goal is not None:
+                self.remove_goal(self.current_goal)
+            if len(self.goals) == 0:
+                return None
+            self.current_goal = self.select_goal()
+            
+            self.petrified_slots |= self.current_goal.lazy_gets
+             
+            self.instructions = self.current_goal.get_moves(self.game)
+        return self.instructions.pop(0)
+        
         
 if __name__ == '__main__':
-    game = Game()
+    game = Game(output_level=2)
     net = Network(game)
     t = ((cards.get, number_term(8)), (cards.get, number_term(15)))
     t = (t, ((cards.get, number_term(3)), (cards.get, number_term(255))))
     node = Goal(t, 100)
     net.add_goal(node)
     print net
-    net.allocate_registers()
+    net.refine()
     print net
-    
-    #for goal in net.goals:
-    #    print goal.status(net.game), goal
-    #print net.get_instructions()
-    
-    def make_moves():
-        for move in net.get_instructions():
-            game.make_half_move(*move)
-            game.make_half_move('l', 0, cards.I) #opponent is idle
+        
+    def make_move():
+        net.check()
+        move = net.pop_instruction()
+        print 'making move', move
+        game.make_half_move(*move)
+        game.make_half_move('l', 0, cards.I) #opponent is idle
+        print game
+        print net
             
-    make_moves()
-    print game  
+    make_move()
+    make_move()
+    make_move()
+    make_move()
+      
