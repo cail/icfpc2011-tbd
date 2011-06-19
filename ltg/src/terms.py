@@ -265,7 +265,7 @@ def unfold_numbers(term):
     if isinstance(term, App):
         left, right = term
         return (unfold_numbers(left), unfold_numbers(right))
-    if type(term) == int: # not isinstance, because IntValue derives from int
+    if isinstance(term, int):
         return number_term(term)
     return term
 
