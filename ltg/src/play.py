@@ -65,7 +65,7 @@ def main(*argv):
         bots[1].set_game(game)
 
     while not game.is_finished():
-        #if game.half_moves % 1000 == 0:
+        #if game.half_moves % 10 == 0:
         #    print>>sys.stderr, 'half turn', game.half_moves
         if game.half_moves >= args.maxturns*2:
             break
