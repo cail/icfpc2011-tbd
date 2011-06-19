@@ -1,8 +1,9 @@
 from pprint import pprint
 import sys
+from copy import copy
 
 from terms import number_term, optimal_subterm, replace_leaf_subterm,\
-    sequential_cost, subterms
+    sequential_cost, subterms, term_to_sequence
 import rules
 from rules import cards
 from game import Game
@@ -10,116 +11,109 @@ from game import Game
 
 FAIL = '0-FAIL'
 WAIT = '1-WAIT'
-OK = '2-OK'
+OK = '2-OK  '
 # for comparisons like FAIL < OK
 
 
-class Node(object):
-    def __init__(self):
-        self.in_ = []
-        self.out = []
-        
-    def name(self):
-        return '???'
-    
-    def check(self):
+  
+            
+class Requirement(object):
+    def check(self, game):
         raise NotImplementedError()
     
+    
+class TermInSlotRequirement(Requirement):
+    def __init__(self, term, slot):
+        self.term = term
+        self.slot = slot
+        
+    def check(self, game):
+        prop = game.proponent
+        if prop.vitalities[self.slot] <= 0:
+            return FAIL
+        #if value_to_term(prop.vitalities[self.slot]) == self.term:
+        #    return OK
+        return WAIT
+    
+    def __str__(self):
+        term = str(self.term)
+        if len(term) > 10:
+            term = '...'
+        return 'REQUIRES {0}@{1}'.format(term, self.slot)
+    
             
-class Goal(Node):
+class Goal(object):
     def __init__(self, term, slot=None):
         self.term = term
         self.slot = slot
-        Node.__init__(self)
+        self.requirements = []
     
     def __str__(self):
-        return 'Construct(term={0} at slot {1})'.format(self.term, self.slot)
+        return 'Goal(term={0}, slot={1}) [{2}] of cost {3}'.\
+            format(self.term, self.slot,
+                   '; '.join(map(str, self.requirements)),
+                   self.cost())
     
     def name(self):
         return 'Goal@{0}'.format(self.slot)
     
-    def status(self):
-        assert self.slot is not None
-        prop = self.game.prop
-        if prop.vitalities[self.slot] <= 0:
-            return FAIL
-        if value_to_term(prop.values[self.slot]) == self.term:
-            return OK
-        return WAIT
-    
-
-class Arrow(object):
-    'arrow x -> y means that y depends on x'
-    def __init__(self, from_, to):
-        self.from_ = None
-        self.to = None
-        self.set_from(from_)
-        self.set_to(to)
-        
-    def set_from(self, from_):
-        if self.from_ is not None:
-            self.from_.out.remove(self)
-        self.from_ = from_
-        if from_ is not None:
-            self.from_.out.append(self)
-        
-    def set_to(self, to):
-        if self.to is not None:
-            self.to.in_.remove(self)
-        self.to = to
-        if to is not None:
-            self.to.in_.append(self)
+    def status(self, game):
+        result = OK
+        for req in self.requirements:
+            result = min(result, req.check(game)) 
+        return result
             
-    def delete(self):
-        self.set_from(None)
-        self.set_to(None)
-        
-    def __str__(self):
-        return '{0} -> {1}'.format(self.from_.name(), self.to.name())
+    def achieved(self, game):
+        prop = game.proponent
+        if prop.vitalities[self.slot] <= 0:
+            return False
+        return False
+        return value_to_term(prop.vitalities[self.slot]) == self.term
+    
+    def cost(self):
+        return sequential_cost(self.term)
+    
+    def get_moves(self):
+        result = []
+        for card, side in term_to_sequence(self.term):
+            result.append((side, self.slot, card))
+        return result
 
 
-slot_numbers_by_reachability = range(rules.SLOTS)
-slot_numbers_by_reachability.sort(key=lambda n: sequential_cost(number_term(n)))
+slot_numbers_by_reachability = sorted(
+    range(rules.SLOTS), 
+    key=lambda n: sequential_cost(number_term(n)))
 
 
 class Network(object):
     def __init__(self, game):
-        self.nodes = []
+        self.goals = []
         self.game = game
+        self.eternal_requirements = [] # for lazy
         
-    def add_node(self, node):
-        node.game = self.game
-        self.nodes.append(node)
-        
-    def get_arrows(self):
-        result = set()
-        for node in self.nodes:
-            result |= set(node.in_)
-            result |= set(node.out)    
+    def clone(self):
+        result = Network(self.game)
+        result.goals = map(copy, self.goals)
         return result
-    
+        
+    def add_goal(self, goal):
+        self.goals.append(goal)
+        
     def __str__(self):
-        result = 'Nodes:\n'
-        for node in self.nodes:
-            result += '   {0}\n'.format(node)
-        result += 'Arrows:\n'
-        for arrow in self.get_arrows():
-            result += '   {0}\n'.format(arrow)
-        result += '({0} steps to construct)'.format(self.steps_to_construct())
+        result = 'Goals:\n'
+        for goal in self.goals:
+            result += '   {0}\n'.format(goal)
+        result += '({0} steps to construct)'.format(self.cost())
         return result
-        
-    def get_goals(self):
-        return [node for node in self.nodes if isinstance(node, Goal)]
-        
+                
     def allocate_register(self, register_slot):
-        prop = self.game.proponent
-        if prop.vitalities[register_slot] < 0:
+        if not self.is_slot_available(register_slot):
             return False
-        
+        prop = self.game.proponent
         register_clean = str(prop.values[register_slot]) == 'I'
         
         terms = []
-        for goal in self.get_goals():
+        for goal in self.goals:
             terms.append(goal.term)
         register_access = (cards.get, number_term(register_slot))
         register_cost = sequential_cost(register_access)
@@ -134,35 +128,82 @@ class Network(object):
         print>>sys.stderr, 'advantage', advantage
         
         sub_goal = Goal(sub_term, register_slot)
-        for goal in self.get_goals():
+        for goal in self.goals:
             if not sub_term in subterms(goal.term):
                 continue
             goal.term = replace_leaf_subterm(sub_term, register_access, goal.term)
-            Arrow(sub_goal, goal) # TODO: only add dependency if needed
-        self.add_node(sub_goal)
+            goal.requirements.append(TermInSlotRequirement(sub_term, register_slot))
+            #Arrow(sub_goal, goal) # TODO: only add dependency if needed
+        self.add_goal(sub_goal)
         
         return True
     
-    def allocate_registers(self):
-        numbers = slot_numbers_by_reachability[:50][::-1]
-        print>>sys.stderr, numbers
-        #numbers = [1]
-        for slot in numbers:
+    def allocate_registers(self, regs=None):
+        if regs is None:
+            regs = slot_numbers_by_reachability[:5][::-1]
+        print>>sys.stderr, regs
+        for slot in regs:
             self.allocate_register(slot)
         
-    def steps_to_construct(self):
-        terms = [goal.term for goal in self.get_goals()]
-        return sum(map(sequential_cost, terms))
+    def cost(self):
+        return sum(goal.cost() for goal in self.goals)
+    
+    def is_slot_available(self, slot_number):
+        'alive and not used by other goal'
+        prop = self.game.proponent
+        if prop.vitalities[slot_number] < 0:
+            return False
+        for goal in self.goals:
+            if goal.slot == slot_number:
+                return False
+        for req in self.eternal_requirements:
+            assert type(req) == 
+        return True
+
+    def remove_achieved_goals(self):
+        new_goals = []
+        for goal in self.goals:
+            if not goal.achieved(self.game):
+                new_goals.append(goal)
+        self.goals = new_goals
     
     def get_instructions(self):
-        pass
+        assert self.goals
+        
+        status = {}
+        
+        for goal in self.goals:
+            status[goal] = goal.status(self.game)
+            if status[goal] == FAIL:
+                print>>sys.stderr, 'network failed because of ', goal
+                return None
+                    
+        for goal in self.goals:
+            assert not goal.achieved(self.game)
+            if goal.status(self.game) == OK:
+                return goal.get_moves()
+            
+        assert set(status.values()) == set([WAIT])
         
 if __name__ == '__main__':
     game = Game()
     net = Network(game)
-    t = ((cards.get, number_term(8)), (cards.get, number_term(65535)))
+    t = ((cards.get, number_term(8)), (cards.get, number_term(15)))
+    t = (t, ((cards.get, number_term(3)), (cards.get, number_term(255))))
     node = Goal(t, 100)
-    net.add_node(node)
+    net.add_goal(node)
     print net
     net.allocate_registers()
     print net
+    
+    #for goal in net.goals:
+    #    print goal.status(net.game), goal
+    #print net.get_instructions()
+    
+    def make_moves():
+        for move in net.get_instructions():
+            game.make_half_move(*move)
+            game.make_half_move('l', 0, cards.I) #opponent is idle
+            
+    make_moves()
+    print game  

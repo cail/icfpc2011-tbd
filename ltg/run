@@ -1,2 +1,2 @@
 #!/bin/sh
-python src/play.py 'slot_killer_bot()' 'slot_killer_bot()' $*
+python src/play.py 'kick_ass_bot()' 'kick_ass_bot()' $*
