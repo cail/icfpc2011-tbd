@@ -70,15 +70,15 @@ def subterms(*terms):
     map(rec, terms)
     return result
  
- 
+
 def replace_leaf_subterm(template, pattern, term):
-     if term == template:
-         return pattern
-     if isinstance(term, App):
-         left, right = term
-         return (replace_leaf_subterm(template, pattern, left), 
-                 replace_leaf_subterm(template, pattern, right))
-     return term
+    if term == template:
+        return pattern
+    if isinstance(term, App):
+        left, right = term
+        return (replace_leaf_subterm(template, pattern, left), 
+                replace_leaf_subterm(template, pattern, right))
+    return term
  
 assert replace_leaf_subterm((1,2), (3, 4), ((1, 2), (3, 4))) == ((3, 4), (3, 4))
      
@@ -114,17 +114,22 @@ def sequential_cost(term):
     return cost[term]
 
 def optimal_subterm(register_cost, *terms):
-    '''(subterm, advantage) or None
+    '''(subterm, advantage)
     
-    Find best subterm to put to temporary slot
+    Find best subterm to put to temporary slot.
+    Don't use result if advantage <= 0
     '''
+    
+    # it's can underestimate advantage because
+    # we don't take into account that term may become sequential
+    
+    # or maybe it's fine...
     
     cost, weight = calc_costs_and_weights(*terms)
     def key(t):
-        return (cost[t]-register_cost)*(weight[t]-1)
+        return (cost[t]-register_cost)*weight[t]-cost[t]
     result = max(cost.keys(), key=key)
-    if key(result) > 0:
-        return result, key(result)
+    return result, key(result)
 
 
 def check_term(term):
@@ -225,5 +230,5 @@ if __name__ == '__main__':
         print '----'
         print 'Error', e
         print "don't worry, evaluation is not fully supported BECAUSE."
-    
-    
+
+
