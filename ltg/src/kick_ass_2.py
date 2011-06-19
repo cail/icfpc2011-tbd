@@ -73,9 +73,9 @@ class KickAss2(Bot):
 
     def choose_move(self):
         if self.is_battery_prepped() and self.is_pain_bearable() and self.is_target_painted() and self.is_gauge_set():
-            print>>sys.stderr, ('everything prepped up -- firing mah lazor!')
-            print>>sys.stderr, (str(self.game.proponent.values[self.gauge_slot]))
-            print>>sys.stderr, (self.gauge)
+            #print>>sys.stderr, ('everything prepped up -- firing mah lazor!')
+            #print>>sys.stderr, (str(self.game.proponent.values[self.gauge_slot]))
+            #print>>sys.stderr, (self.gauge)
             move = (RIGHT_APP, self.battery_slot, cards.I)
         else:
             try:
@@ -112,7 +112,7 @@ class KickAss2(Bot):
             self.battery_slot = bat_cand
         if old_battery_slot != self.battery_slot:
             self.battery_prepped = False
-        print>>sys.stderr, ('battery ' + str(self.battery_slot))
+        #print>>sys.stderr, ('battery ' + str(self.battery_slot))
 
     def pick_pain(self):
         old_pain_slot = self.pain_slot
@@ -123,8 +123,8 @@ class KickAss2(Bot):
         if old_pain_slot != self.pain_slot:
             self.battery_prepped = False
         self.pain = self.recommend_pain()
-        print>>sys.stderr, ('pain slot ' + str(self.pain_slot))
-        print>>sys.stderr, ('pain ' + str(self.pain))
+        #print>>sys.stderr, ('pain slot ' + str(self.pain_slot))
+        #print>>sys.stderr, ('pain ' + str(self.pain))
 
     def pick_observer(self):
         old_observer_slot = self.observer_slot
@@ -134,7 +134,7 @@ class KickAss2(Bot):
                                                        y[0] != self.gauge_slot) else x, zip(range(SLOTS), self.game.proponent.vitalities), (0, 0))[0]
         if old_observer_slot != self.observer_slot:
             self.battery_prepped = False
-        print>>sys.stderr, ('observer ' + str(self.observer_slot))
+        #print>>sys.stderr, ('observer ' + str(self.observer_slot))
 
     def pick_gauge(self):
         old_gauge_slot = self.gauge_slot
@@ -145,13 +145,13 @@ class KickAss2(Bot):
         if old_gauge_slot != self.gauge_slot:
             self.battery_prepped = False
         self.gauge = self.recommend_gauge()
-        print>>sys.stderr, ('gauge slot ' + str(self.gauge_slot))
-        print>>sys.stderr, ('gauge ' + str(self.gauge))
+        #print>>sys.stderr, ('gauge slot ' + str(self.gauge_slot))
+        #print>>sys.stderr, ('gauge ' + str(self.gauge))
 
     def pick_target(self):
         self.target_slot = reduce(lambda x, y: y if y[1] < x[1] and y[1] != 0 else x, zip(range(SLOTS), self.game.opponent.vitalities), (0, 100500))[0]
         #self.target_slot = reduce(lambda x, y: y if len(str(y[1])) > len(str(x[1])) and y[2] != 0 else x, zip(range(SLOTS), self.game.opponent.values, self.game.opponent.vitalities), (0, '', 0))[0]
-        print>>sys.stderr, ('attacking ' + str(self.target_slot))
+        #print>>sys.stderr, ('attacking ' + str(self.target_slot))
         self.pick_gauge()
 
     def recommend_gauge(self):
