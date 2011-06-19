@@ -55,13 +55,15 @@ def subterms(*terms):
     result = []
     visited = set()
     def rec(term):
+        if term in visited:
+            return
         if isinstance(term, App):
             left, right = term
             rec(left)
             rec(right)
-        if term not in visited:
-            visited.add(term)
-            result.append(term)
+        assert term not in visited
+        visited.add(term)
+        result.append(term)
     map(rec, terms)
     return result
  
@@ -78,11 +80,7 @@ def replace_leaf_subterm(template, pattern, term):
 assert replace_leaf_subterm((1,2), (3, 4), ((1, 2), (3, 4))) == ((3, 4), (3, 4))
      
 
-def optimal_subterm(register_cost, *terms):
-    '''(subterm, advantage) or None
-    
-    Find best subterm to put to temporary slot
-    '''
+def calc_costs_and_weights(*terms):
     st = subterms(*terms)
     cost = {}
     for t in st:
@@ -105,10 +103,23 @@ def optimal_subterm(register_cost, *terms):
                 weight[right] += weight[t]
             else:
                 weight[right] += weight[t]*3
+    return cost, weight
+
+
+def sequential_cost(term):
+    cost, _ = calc_costs_and_weights(term)
+    return cost[term]
+
+def optimal_subterm(register_cost, *terms):
+    '''(subterm, advantage) or None
     
+    Find best subterm to put to temporary slot
+    '''
+    
+    cost, weight = calc_costs_and_weights(*terms)
     def key(t):
         return (cost[t]-register_cost)*(weight[t]-1)
-    result = max(st, key=key)
+    result = max(cost.keys(), key=key)
     if key(result) > 0:
         return result, key(result)
 
@@ -162,9 +173,14 @@ def term_to_sequence(term):
     if isinstance(term, App):
         left, right = term
         if not isinstance(left, App):
-            return term_to_sequence(right)+[(left, 'l')]
-        return apply_sequences(term_to_sequence(left), term_to_sequence(right))
-    return [(term, 'r')]
+            result = term_to_sequence(right)+[(left, 'l')]
+        else:
+            result = apply_sequences(term_to_sequence(left), term_to_sequence(right))
+    else:
+        result = [(term, 'r')]
+    #TODO: comment for performance
+    assert sequential_cost(term) == len(result)
+    return result
 
 
 def parse_term(s, locals={}):
