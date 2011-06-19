@@ -179,5 +179,5 @@ class KickAss(Bot):
 
     def is_gauge_set(self):
         return (self.game.proponent.vitalities[self.gauge_slot] > 1000 and self.game.proponent.values[self.gauge_slot] == self.gauge and
-                self.gauge >= self.recommend_gauge() * 2 / 3)
+                (self.gauge >= self.recommend_gauge() * 2 / 3 and self.gauge <= self.recommend_gauge() * 2))
 
