@@ -43,7 +43,7 @@ class PrepBattery(Bot):
         boost = number_term(self.boost)
         sequence = []
         for t in [
-            r'(\icomb. (K (icomb get batslot)) ((K (icomb help batslot batslot boost)) (icomb attack batslot (icomb get obsslot) (icomb get ggeslot))))',
+            r'(\icomb. (K (icomb get batslot)) ((K (icomb help batslot batslot boost)) (attack batslot (icomb get obsslot) (icomb get ggeslot))))',
             ]:
             t = parse_lambda(t, locals())
             t = binarize_term(t)
