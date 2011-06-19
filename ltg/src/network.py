@@ -90,6 +90,9 @@ class Network(object):
         self.instructions = []
         self.current_goal = None
 
+    def dont_touch(self, *slots):
+        self.petrified_slots |= set(slots)
+
     def is_finished(self):
         return self.next_move is None
 

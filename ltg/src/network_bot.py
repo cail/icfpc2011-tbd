@@ -137,8 +137,11 @@ class SampleNetworkBot(NetworkBot):
             13: '(zombie {0} {1})'.format(255-target, lazy_help),
         })
         
+        plan.dont_touch(*range(100)) # just for example
+        
         def plan_checker():
             return True # TODO:
+        
         return plan, plan_checker
     
     def make_plan(self):
