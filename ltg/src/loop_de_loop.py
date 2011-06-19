@@ -5,7 +5,7 @@ from rules import cards, SLOTS, MAX_SLOT, LEFT_APP, RIGHT_APP
 from sequence_bot import SequenceBot
 from simple_bot import Bot
 from slot_killer import SequenceBotNone
-from terms import number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda, unfold_numbers
+from terms import scnt, number_term, number_term_with_min_seq_cost, term_to_sequence, binarize_term, parse_lambda, unfold_numbers
 
 
 def loop_de_loop_bot():
@@ -41,6 +41,7 @@ class LambdaSequenceBot(Bot):
 
 class MultipleLambdaSequencesBot(Bot):
     def __init__(self, bots, lcl):
+        self.boostable = True
         self.lcl = lcl
         self.bots = []
         for bot_slot, bot_lmb in bots:
@@ -51,19 +52,35 @@ class MultipleLambdaSequencesBot(Bot):
         for bot in self.bots:
             bot.set_game(game)
 
+    def boost_muthafucka(self, critical_slot):
+        self.boostable = False
+        boost = number_term(8192)
+        boost_slot = reduce(lambda x, y: y if scnt(y[0]) < scnt(x[0]) and y[0] > 3 and y[1] >= 10000 else x, zip(range(SLOTS), self.game.proponent.vitalities), (255, 0))[0]
+        crtslot = number_term(critical_slot)
+        bstslot = number_term(boost_slot)
+        boost_bot = LambdaSequenceBot(boost_slot, r'(put I help bstslot crtslot boost)', locals())
+        boost_bot.set_game(self.game)
+        self.bots.insert(0, boost_bot)
+
     def choose_move(self):
+        if self.boostable:
+            for critical_slot in range(4):
+                if self.game.proponent.vitalities[critical_slot] < 60000:
+                    self.boost_muthafucka(critical_slot)
+                    break
         for bot in self.bots:
             move = bot.choose_move()
             if move != None:
                 return move
+        self.boostable = True
         return None
 
 
 class LoopDeLoop(Bot):
     def __init__(self):
         self.terminate = False
-        voltage = number_term(8192)
-        otake = number_term(768)
+        voltage = number_term(40960)
+        otake = number_term(4096)
         tgt = number_term(255)
         self.sequence = MultipleLambdaSequencesBot([
                                                    ####(2, r'(\icomb. (icomb K (icomb get (succ (succ zero))) icomb) ((icomb get zero) (icomb get (succ zero))))'),
