@@ -211,11 +211,39 @@ def parse_lambda(s, locals={}):
     return parse_term(eliminate_abstraction(s), locals)
 
 
+def fold_numbers(term):
+    if isinstance(term, App):
+        left, right = term
+        left = fold_numbers(left)
+        right = fold_numbers(right)
+        if isinstance(right, int):
+            right = int(right)
+            if left == cards.succ:
+                return min(right+1, 65535)
+            elif left == cards.dbl:
+                return min(right*2, 65535)
+        return (left, right)
+    if isinstance(term, int):
+        return int(term)
+    return term
+    
+def unfold_numbers(term):
+    if isinstance(term, App):
+        left, right = term
+        return (unfold_numbers(left), unfold_numbers(right))
+    if type(term) == int: # not isinstance, because IntValue derives from int
+        return number_term(term)
+    return term
+
+
 if __name__ == '__main__':
-    t = ((cards.get, number_term(65535)), (cards.get, number_term(5)))
+    t = ((cards.get, 65535), (cards.get, 5))
+    assert fold_numbers(unfold_numbers(t)) == t
 
     #print term_to_str(t)
     pprint(t)
+    
+    t = unfold_numbers(t)
     
     t = binarize_term(t)
     print 'optimal subterm', optimal_subterm(3, t)
