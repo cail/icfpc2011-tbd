@@ -27,7 +27,7 @@ if __name__ == '__main__':
     sys.stdout = log # because game outputs to stdout
     # it's dirty, but i don't care
     
-    bots = [PlaybackBot(replay[::2], game), PlaybackBot(replay[1::2], game)]
+    bots = [PlaybackBot(replay[::2]).set_game(game), PlaybackBot(replay[1::2]).set_game(game)]
 
     skip_begin = -1
     skip_end = -1

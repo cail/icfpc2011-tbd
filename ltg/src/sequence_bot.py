@@ -7,9 +7,8 @@ from simple_bot import Bot
 from terms import number_term, term_to_sequence, binarize_term, parse_lambda
 
 class SequenceBot(Bot):
-    def __init__(self, sequence, slot, game):
+    def __init__(self, sequence, slot):
         print>>sys.stderr, 'sequence length', len(sequence)
-        self.game = game
         self.it = iter(sequence)
         self.slot = slot
         
@@ -44,5 +43,5 @@ def test_seq_bot():
         t = binarize_term(t)
         sequence += term_to_sequence(t)
     slot = 0
-    return partial(SequenceBot, sequence, slot)
+    return SequenceBot(sequence, slot)
 

@@ -51,14 +51,15 @@ def main(*argv):
     
     args = parser.parse_args(argv)
     replay = args.replay
+    bot_number = args.number
     
     game = Game()
     
-    ctr1 = eval(args.bot1)
-    ctr2 = eval(args.bot2)
-        
-    
-    bots = [ctr1(game), ctr2(game)]
+    bots = [eval(args.bot1), eval(args.bot2)]
+    if bot_number in (0, None):
+        bots[0].set_game(game)
+    if bot_number in (1, None):
+        bots[1].set_game(game)
 
     while not game.is_finished():
         #if game.half_moves % 1000 == 0:
@@ -69,11 +70,11 @@ def main(*argv):
             game.zombie_phase()
         bot = bots[game.half_moves%2]
         
-        if args.number == 1-game.half_moves%2:
+        if bot_number == 1-game.half_moves%2:
             move = receive_move()
         else:
             move = bot.choose_move()
-        if args.number == game.half_moves%2:
+        if bot_number == game.half_moves%2:
             send_move(*move)
         game.make_half_move(*move)
         if replay is not None:

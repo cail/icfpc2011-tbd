@@ -15,8 +15,11 @@ __all__ = [
 ]
 
 class Bot(object):
-    def __init__(self, game):
+    def set_game(self, game):
+        '''Should be called by all interpreters after construction
+        so that bot creation routines shouldn't have to specify the game'''
         self.game = game
+        return self # to allow call chaining
     def choose_move(self):
         # choose move happens after zombie phase, you you see most current state
         raise NotImplementedError()
@@ -27,15 +30,17 @@ class IdleBot(Bot):
 
 
 class RandomBot(Bot):
+    def __init__(self, rand_seed = None):
+        self.rnd = random.Random(rand_seed)
+        self.slots_range = range(10) + range(100, 105) + range(SLOTS - 10, SLOTS)        
     def choose_move(self):
         return (
-            random.choice([LEFT_APP, RIGHT_APP]), 
-            random.randrange(min(SLOTS, 10)),
-            random.choice(card_by_name.values()))
+            self.rnd.choice([LEFT_APP, RIGHT_APP]),
+            self.rnd.choice(self.slots_range),
+            self.rnd.choice(card_by_name.values()))
 
 
 class InteractiveBot(Bot):
-      
     def read_slot(self):
         print 'slot no?'
         while True:
@@ -84,9 +89,8 @@ class InteractiveBot(Bot):
     
 
 class PlaybackBot(Bot):
-    def __init__(self, moves, game):
+    def __init__(self, moves):
         self.moves = iter(moves)
-        self.game = game
     def choose_move(self):
         dir, slot, card = next(self.moves).split()
         if dir == '1':
