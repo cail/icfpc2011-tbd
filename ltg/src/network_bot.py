@@ -11,6 +11,7 @@ from terms import number_term, term_to_sequence, binarize_term, parse_lambda,\
 
 from network import Network, Goal, NetworkFail
 
+NO_PLAN = 'NO PLAN'
 
 class NetworkBot(Bot):
     def __init__(self, debug=False):
@@ -34,6 +35,8 @@ class NetworkBot(Bot):
                 
             if self.net is None:
                 self.net, self.checker = self.make_plan()
+                if self.net == NO_PLAN:
+                    return ('l', 0, cards.I)                
                 self.net.refine()
                 self.net.begin()
                 if self.debug:
@@ -43,6 +46,9 @@ class NetworkBot(Bot):
                         print>>sys.stderr, 'plan was impossible from the beginning'
                 if self.debug:
                     raw_input()
+            
+            if self.net == NO_PLAN:
+                return ('l', 0, cards.I)
             
             if self.net.is_finished():
                 if self.debug:
@@ -78,21 +84,34 @@ def lambdas_to_plan(game, d):
                    
             
 class SampleNetworkBot(NetworkBot):
+    def __init__(self, debug=False):
+        self.plans_limit = 10
+        NetworkBot.__init__(self, debug)
+        
     def make_plan(self):
+        self.plans_limit -= 1
+        if self.plans_limit < 0:
+            return NO_PLAN, None
+        
         damage = 8192
         attacker1 = randrange(SLOTS)
         attacker2 = randrange(SLOTS)
         target = randrange(SLOTS)
         plan = lambdas_to_plan(self.game, {
-            42: r'(attack {0} {1} {2})'.format(attacker1, target, damage),
-            43: r'(attack {0} {1} {2})'.format(attacker2, target, damage),
+            42: r'(attack {0} {1} {2})'.format(attacker1, 255-target, damage),
+            43: r'(attack {0} {1} {2})'.format(attacker2, 255-target, damage),
         })
         
         def plan_checker():
             prop = self.game.proponent
+            opp = self.game.opponent
 
-            if prop.vitalities[attacker1] <= damage and \
-                prop.vitalities[attacker2] <= damage:
+            d = 0
+            if prop.vitalities[attacker1] >= damage:
+                d += damage*9//10
+            if prop.vitalities[attacker2] >= damage:
+                d += damage*9//10
+            if opp.vitalities[target] > d:
                 return False
 
             return True
