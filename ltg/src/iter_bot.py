@@ -108,19 +108,19 @@ class IterBot(Bot):
         
         
 class ZombieRush(IterBot):
-    def __init__(self, handicap):
+    def __init__(self, handicap=0):
         self.handicap = handicap
         super(type(self), self).__init__()
 
     def ensure_zombie_heal_possible(self, donor, acceptor, strength):
         vits = self.game.opponent.vitalities
-        if vits[acceptor] < strength:
+        if vits[donor] < strength:
             raise Fail('acceptor is too weak')
         if donor == acceptor:
-            if vits[donor] > strength+strength*11//10:
+            if vits[acceptor] > strength+strength*11//10:
                 raise Fail('not enough help to kill donor by himself')
         else:
-            if vits[donor] > strength*11//10:
+            if vits[acceptor] > strength*11//10:
                 raise Fail('not enough help to kill donor')
 
     def rush(self):
@@ -136,8 +136,7 @@ class ZombieRush(IterBot):
         for move in kill:
             yield move
         
-        donor = 0 #1
-        acceptor = 0
+        donor = acceptor = 0
         zombie = chain(     
             self.assign_term(1, '(K (help {0} {1}))'.format(donor, acceptor)),
             self.run_seq(0, 'K l'),
