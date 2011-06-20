@@ -62,10 +62,12 @@ def main(replay_name):
                     except RuntimeError as e:
                         value = str(e)
                     color = '#B0FFB0'
+                    if vit < INITIAL_VITALITY:
+                        color = '#E0E090'
                     if vit == 0:
                         color = '#FFB0B0'
                     if vit == -1:
-                        color = '#00A060'
+                        color = '#507040'
                     if (vit, value) != (INITIAL_VITALITY, 'I'):
                         print>>html, '<tr style="background-color:{3}"><td>{0}</td><td>{1}</td><td>{2}</td>'.format(i, vit, value, color)
                 print>>html, '</table>'
