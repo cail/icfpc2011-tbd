@@ -5,7 +5,7 @@ from game import Game
 from simple_bot import PlaybackBot
 from rules import SLOTS, INITIAL_VITALITY, cards, LEFT_APP
 
-HEAD = 750 # how many head and tail moves we show
+HEAD = 300 # how many head and tail moves we show
 TAIL = 20
 
 def main(replay_name):
@@ -85,10 +85,11 @@ def main(replay_name):
             else:
                 print>>html, ('player {0} applied slot {1} to card {2}'.
                     format(player, move[1], move[2]))
-            print>>html, '</div>'
+
         game.make_half_move(*move)
         if show:
             print>>html, '</pre>'
+            print>>html, '</div>'
 
     print>>html, '<h1>{0}:{1}</h1>'.format(game.players[0].num_alive_slots(), game.players[1].num_alive_slots())
     print>>html, '</div></body></html>'

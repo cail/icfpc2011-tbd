@@ -18,6 +18,7 @@ if __name__ == '__main__':
         except Exception as e:
             sys.stdout.flush()
             print_exc()
+            sys.stderr.flush()
             continue
         print len(seq),
         seq = sequence_to_str(seq)

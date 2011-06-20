@@ -14,6 +14,7 @@ from kick_ass_2 import kick_ass_2_bot
 from the_battery import the_battery_bot
 from network_bot import SampleNetworkBot
 from loop_de_loop import loop_de_loop_bot
+from iter_bot import IterBot, ZombieRush
 
 
 def send_move(direction, slot, card):
@@ -71,8 +72,8 @@ def main(*argv):
         bots[1].set_game(game)
 
     while not game.is_finished():
-        #if game.half_moves % 10000 == 0:
-            #print>>sys.stderr, 'half turn', game.half_moves
+        if game.half_moves % 10000 == 0:
+            print>>sys.stderr, 'half turn', game.half_moves
         if game.half_moves >= args.maxturns*2:
             break
         if game.has_zombie_phase():
@@ -103,7 +104,7 @@ def main(*argv):
         
     if replay is not None:
         replay.close()
-    #print>>sys.stderr, 'game ended at half turn', game.half_moves    
+    print>>sys.stderr, 'game ended at half turn', game.half_moves    
     
 if __name__ == '__main__':
     main()

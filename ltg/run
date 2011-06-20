@@ -1,2 +1,2 @@
 #!/bin/sh
-python -OO src/play.py 'San(SampleNetworkBot())' 'San(SampleNetworkBot())' $*
+python src/play.py 'ZombieRush()' 'ZombieRush()' $*
