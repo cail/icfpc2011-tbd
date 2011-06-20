@@ -1,5 +1,11 @@
 import sys
 import argparse
+import logging
+
+FORMAT = '%(name)s %(message)s'
+logging.basicConfig(format=FORMAT)
+
+#logging.getLogger().setLevel(logging.DEBUG)
 
 import rules
 from rules import LEFT_APP, RIGHT_APP, card_by_name

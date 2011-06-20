@@ -1,9 +1,12 @@
 from itertools import *
 import random
+import sys
+import logging
 
 from rules import cards
 from simple_bot import Bot
 from terms import lambda_to_sequence, parse_sequence, apply_sequences
+
 
 
 class Fail(Exception):
@@ -13,6 +16,7 @@ class Fail(Exception):
 class IterBot(Bot):
     def __init__(self):
         self.it = None
+        self.log = logging.getLogger('IdleBot')
         
     def get_strategy(self):
         'return iterable'
@@ -24,49 +28,59 @@ class IterBot(Bot):
         return next(self.it, ('l', 42, cards.zero))
     
     
-    @staticmethod
-    def fail_safe(self, strat):
-        try:
-            for move in strat:
-                yield move
-        except:
-            pass
+    def fail_safe(self, strat, retries=1):
+        for i in range(retries):
+            try:
+                for move in strat:
+                    yield move
+                return
+            except Fail as e:
+                if i == retries-1:
+                    self.log.warning('fail {0} - abort'.format(e))
+                else:
+                    self.log.warning('fail {0} - retry'.format(e))
+                    
             
     
-    @staticmethod
-    def run_seq(slot, sequence):
+    def run_seq(self, slot, sequence):
         if isinstance(sequence, str):
             sequence = parse_sequence(sequence)
+        prop = self.game.proponent
         for card, dir in sequence:
+            if prop.vitalities[slot] <= 0:
+                raise Fail('run_seq on dead slot {0}'.format(slot))
             yield (dir, slot, card)
         
-    @staticmethod
-    def run_term(slot, term, dirty=False):
+
+    def run_term(self, slot, term, dirty=False):
+        prop = self.game.proponent
         if dirty:
+            if prop.vitalities[slot] <= 0:
+                raise Fail('run_seq on dead slot {0}'.format(slot))
             yield ('l', slot, cards.put)
         for card, dir in lambda_to_sequence(term):
+            if prop.vitalities[slot] <= 0:
+                raise Fail('run_seq on dead slot {0}'.format(slot))
             yield (dir, slot, card)
             
             
     def assign_term(self, slot, term):
         prop = self.game.proponent
-        for move in\
-            self.run_term(slot, term, dirty=(prop.values[slot] != cards.I)):
-            yield move
+        return self.run_term(slot, term, dirty=(prop.values[slot] != cards.I))
+    
             
-    @staticmethod
-    def apply_to(f, arg):
+    def apply_to(self, f, arg):
         'slot[f] = slot[f](arg)'
-        return IterBot.run_seq(f, apply_sequences([], lambda_to_sequence(arg)))
+        return self.run_seq(f, apply_sequences([], lambda_to_sequence(arg)))
 
     def fresh_slot(self, rng=range(256)):
         prop = self.game.proponent
-        rng = list(rng)
-        random.shuffle(rng)
-        for slot in rng:
+        r = list(rng)
+        random.shuffle(r)
+        for slot in r:
             if prop.vitalities[slot] > 0 and prop.values[slot] == cards.I:
                 return slot
-        raise Fail()
+        raise Fail("Can't find fresh slot among {0}".format(rng))
 
     def revive_reflex(self, strat, slots):
         prop = self.game.proponent
@@ -76,6 +90,7 @@ class IterBot(Bot):
             for slot in slots:
                 if prop.vitalities[slot] <= 0:
                     t = self.fresh_slot(range(10, 250))
+                    self.log.info('revive reflex {0} at {1}'.format(slot, t))
                     for m in self.run_term(t, '(revive {0})'.format(slot)):
                         yield m
                         
@@ -87,27 +102,51 @@ class IterBot(Bot):
             for slot in slots:
                 if opp.vitalities[slot] == 1:
                     t = self.fresh_slot(range(10, 250))
+                    self.log.info('coup de gras reflex {0} at {1}'.format(slot, t))
                     for m in self.run_term(t, '(dec {0})'.format(255-slot)):
                         yield m        
         
         
 class ZombieRush(IterBot):
+    def __init__(self, handicap):
+        self.handicap = handicap
+        super(type(self), self).__init__()
+
+    def ensure_zombie_heal_possible(self, donor, acceptor, strength):
+        vits = self.game.opponent.vitalities
+        if vits[acceptor] < strength:
+            raise Fail('acceptor is too weak')
+        if donor == acceptor:
+            if vits[donor] > strength+strength*11//10:
+                raise Fail('not enough help to kill donor by himself')
+        else:
+            if vits[donor] > strength*11//10:
+                raise Fail('not enough help to kill donor')
 
     def rush(self):
-        strat = chain(
-            self.assign_term(0, r'9216'), # because this number will also be used for Z
+        self.log.info('rush')
+        strength = 9216 # because this number will also be used for Z
+        kill = chain(
+            self.assign_term(0, str(strength)),
             self.assign_term(1, r'(\source. attack source 0 (get 0))'),
             self.assign_term(2, r'(get 1)'),
             self.apply_to(1,'0'), # attack 0 -> 0
-            #self.run_seq(2,'K l, S l, succ r, zero r'), 
             self.apply_to(2, '1'), # attack 1 -> 0
-             
-            self.assign_term(1, '(K (help 1 0))'),
+        )
+        for move in kill:
+            yield move
+        
+        donor = 0 #1
+        acceptor = 0
+        zombie = chain(     
+            self.assign_term(1, '(K (help {0} {1}))'.format(donor, acceptor)),
             self.run_seq(0, 'K l'),
             self.assign_term(2, '(S (get 1) (get 0)'),
             self.assign_term(3, '(zombie 0 (get 2))'),
         )
-        return strat
+        for move in zombie:
+            self.ensure_zombie_heal_possible(donor, acceptor, strength)
+            yield move
     
     def generic_zombie(self):
         vits = self.game.opponent.vitalities
@@ -118,6 +157,9 @@ class ZombieRush(IterBot):
             donor, acceptor = acceptor, donor
         
         strength = vits[donor]
+        
+        self.log.info('generic zombie (heal {0} {1} {2})'.
+                      format(donor, acceptor, strength))
         
         strat = chain(
             self.assign_term(0, str(acceptor)),
@@ -130,15 +172,19 @@ class ZombieRush(IterBot):
         )
         
         for move in strat:
+            self.ensure_zombie_heal_possible(donor, acceptor, strength)
             yield move
                                 
     def get_strategy(self):
+        self.log = logging.getLogger('IterBot.Player{0}'.format(self.game.half_moves%2))
+        self.log.info('creating strategy')
+        
         strat = chain(
-            self.rush(),
-            chain(*(self.generic_zombie() for _ in xrange(1000))),
-            repeat(('r', 66, cards.zero)),
+            [('l', 0, cards.I)]*self.handicap,
+            self.fail_safe(self.rush()),
+            chain(*(self.fail_safe(self.generic_zombie()) for _ in xrange(1000))),
             )
-        strat = self.coup_de_gras_reflex(strat, range(253, 256))
-        strat = self.revive_reflex(strat, range(5))
+        strat = self.coup_de_gras_reflex(strat, [255])
+        strat = self.revive_reflex(strat, range(4))
         return strat
     
