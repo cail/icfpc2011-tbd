@@ -149,10 +149,11 @@ def eliminate_abstraction(s):
 
 
 if __name__ == '__main__':
+    print r'Enter lambda expression, for instance (\x y. f y x)'
     while True:
-        sys.stdout.write('>>> ');
+        print '>>>',
         try:
-            print eliminate_abstraction(sys.stdin.readline())
+            print eliminate_abstraction(raw_input())
         except LambdaParserException as e:
             print '\nError: ' + e.args[0]
 

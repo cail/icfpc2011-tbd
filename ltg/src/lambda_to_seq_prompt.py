@@ -7,6 +7,8 @@ from abselim import LambdaParserException
 
 
 if __name__ == '__main__':
+    print 'Enter term, possibly with lambdas and numbers.'
+    print r'For instance (\target. attack 0 target 10000)'
     while True:
         print '>>>',
         s = raw_input()
